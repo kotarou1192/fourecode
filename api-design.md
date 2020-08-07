@@ -10,14 +10,14 @@
 - value
   - 内容
 - token
-  - super(null可能)
+  - master(null可能)
   - onetime(null不可)
 
 ### token管理
 
 1. onetimeを普段は使用(期限は1週間ほど)
-2. onetimeの期限が切れていたらsuperトークンを使いonetimeを再発行
-3. superトークンも期限が切れたらログインし直し（期限1ヶ月ほど）
+2. onetimeの期限が切れていたらmasterトークンを使いonetimeを再発行
+3. masterトークンも期限が切れたらログインし直し（期限1ヶ月ほど）
 
 ### password_reset
 
