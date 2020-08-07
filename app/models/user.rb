@@ -15,6 +15,7 @@ class User < ApplicationRecord
   validates :password, presence: true, length: { minimum: 6 }
 
   has_many :master_session, dependent: :destroy
+  has_many :onetime_session, dependent: :destroy
 
   def self.new_token
     SecureRandom.hex(64)
