@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MasterSession < ApplicationRecord
-  DATE_LIMIT = 2
+  DATE_LIMIT = 30
 
   attr_accessor :token
 
