@@ -34,4 +34,10 @@ class MasterSessionTest < ActiveSupport::TestCase
     user = User.find_by(id: session.user_id)
     assert user.email == @email
   end
+
+  test 'old session should not be available' do
+    @master_session.update(created_at: 3.days.ago)
+
+    assert_not @master_session.available?
+  end
 end
