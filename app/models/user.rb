@@ -2,17 +2,19 @@
 
 class User < ApplicationRecord
   attr_accessor :activation_token, :password
-  before_save   :downcase_email, :generate_uuid, :create_password_digest
-  before_create :create_activation_digest
+  before_save   :downcase_email, :create_password_digest
+  before_create :create_activation_digest, :generate_uuid
 
   validates :nickname, presence: true, length: { maximum: 30 }
-  validates :name, presence: true, length: { maximum: 30 }
+  validates :name, uniqueness: true, presence: true, length: { maximum: 30 }
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i.freeze
   validates :email, presence: true, length: { maximum: 255 },
                     format: { with: VALID_EMAIL_REGEX },
                     uniqueness: true
 
   validates :password, presence: true, length: { minimum: 6 }
+
+  has_many :master_session, dependent: :destroy
 
   def self.new_token
     SecureRandom.hex(64)
