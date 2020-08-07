@@ -36,7 +36,7 @@ class MasterSessionTest < ActiveSupport::TestCase
   end
 
   test 'old session should not be available' do
-    @master_session.update(created_at: 3.days.ago)
+    @master_session.update(created_at: 100.days.ago)
 
     assert_not @master_session.available?
   end
