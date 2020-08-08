@@ -2,8 +2,8 @@
 
 class User < ApplicationRecord
   attr_accessor :activation_token, :password
-  before_save   :downcase_email, :create_password_digest
-  before_create :create_activation_digest, :generate_uuid
+  before_save   :downcase_email
+  before_create :create_activation_digest, :generate_uuid, :create_password_digest
 
   validates :nickname, presence: true, length: { maximum: 30 }
   validates :name, uniqueness: true, presence: true, length: { maximum: 30 }
@@ -11,8 +11,7 @@ class User < ApplicationRecord
   validates :email, presence: true, length: { maximum: 255 },
                     format: { with: VALID_EMAIL_REGEX },
                     uniqueness: true
-
-  validates :password, presence: true, length: { minimum: 6 }
+  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
 
   has_many :master_session, dependent: :destroy
   has_many :onetime_session, dependent: :destroy

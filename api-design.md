@@ -2,7 +2,7 @@
 
 ### 返ってくるjson
 
-- status : SUCCESS | FAILED | ERROR
+- status : SUCCESS | FAILED | ERROR | OLD_TOKEN
 - body
   - 内容
   

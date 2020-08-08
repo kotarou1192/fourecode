@@ -61,6 +61,14 @@ login
 を含めること
 戻り値のトークンは必ずどちらも控えること。
 
+#### PUT /auth
+onetime token再発行
+パラメーターには
+- token
+  - master
+
+を含めること
+
 #### DELETE /auth
 logout
 パラメーターには

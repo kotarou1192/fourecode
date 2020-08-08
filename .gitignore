@@ -35,3 +35,4 @@
 /config/puma.rb
 /config/environments/production.rb
 nohup.out
+memo.json

@@ -29,6 +29,10 @@ module Api
       end
 
       def update
+        if user_tokens[:master].nil?
+          return render json: generate_response(FAILED, message: 'property master of token is empty')
+        end
+
         master_session = MasterSession.find_by(token_digest: MasterSession.digest(user_tokens[:master]))
         unless master_session
           return render json: generate_response(FAILED, message: 'you are not logged in')
