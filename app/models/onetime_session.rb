@@ -7,6 +7,7 @@ class OnetimeSession < ApplicationRecord
 
   before_create :generate_token
 
+  belongs_to :master_session
   belongs_to :user
 
   def self.new_token

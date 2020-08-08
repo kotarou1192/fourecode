@@ -22,7 +22,7 @@ module Api
 
         if user&.authenticated?(:password, user_params[:password])
           generate_access_token(user)
-          return render json: generate_response(SUCCESS, token: { master: @master_token.token, onetime: @onetime_token.token })
+          return render json: generate_response(SUCCESS, token: { master: @master_session.token, onetime: @onetime_session.token })
         end
 
         render json: generate_response(FAILED, message: 'invalid password')
@@ -36,12 +36,14 @@ module Api
 
         user = User.find_by(id: master_session.user_id)
         unless master_session.available?
-          destroy_sessions(user)
+          master_session.destroy!
           return render json: generate_response(OLD_TOKEN, message: 'master token is too old.')
         end
 
         destroy_old_onetime_sessions(user)
-        onetime_session = user.onetime_session.create!
+        onetime_session = master_session.onetime_session.new
+        onetime_session.user = user
+        onetime_session.save!
         render json: generate_response(SUCCESS, token: { onetime: onetime_session.token })
       end
 
@@ -78,19 +80,18 @@ module Api
       end
 
       def generate_access_token(user)
-        destroy_sessions(user)
         ActiveRecord::Base.transaction do
-          @master_token = user.master_session.create!
-          @onetime_token = user.onetime_session.create!
+          @master_session = user.master_session.create!
+          @onetime_session = @master_session.onetime_session.new
+          @onetime_session.user = user
+          @onetime_session.save!
         end
       end
 
       def destroy_sessions(user)
         master_sessions = MasterSession.where(user_id: user.id)
-        onetime_sessions = OnetimeSession.where(user_id: user.id)
         ActiveRecord::Base.transaction do
           master_sessions.each(&:destroy!)
-          onetime_sessions.each(&:destroy!)
         end
       end
 

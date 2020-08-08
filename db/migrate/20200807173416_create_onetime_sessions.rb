@@ -5,6 +5,7 @@ class CreateOnetimeSessions < ActiveRecord::Migration[6.0]
     create_table :onetime_sessions do |t|
       t.string :user_id
       t.string :token_digest
+      t.references :master_session, foreign_key: true
       t.timestamps
     end
     add_foreign_key :onetime_sessions, :users

@@ -25,8 +25,10 @@ ActiveRecord::Schema.define(version: 2020_08_07_173416) do
   create_table "onetime_sessions", force: :cascade do |t|
     t.string "user_id"
     t.string "token_digest"
+    t.bigint "master_session_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["master_session_id"], name: "index_onetime_sessions_on_master_session_id"
   end
 
   create_table "users", id: :string, limit: 36, force: :cascade do |t|
@@ -43,5 +45,6 @@ ActiveRecord::Schema.define(version: 2020_08_07_173416) do
   end
 
   add_foreign_key "master_sessions", "users"
+  add_foreign_key "onetime_sessions", "master_sessions"
   add_foreign_key "onetime_sessions", "users"
 end

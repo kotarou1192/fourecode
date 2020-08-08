@@ -14,7 +14,10 @@ class OnetimeSessionTest < ActiveSupport::TestCase
                      email: @email,
                      password: 'hogefuga')
     @user.save
-    @onetime_session = @user.onetime_session.create
+    @master_session = @user.master_session.create!
+    @onetime_session = @master_session.onetime_session.new
+    @onetime_session.user = @user
+    @onetime_session.save!
   end
 
   test 'should be present' do
@@ -42,8 +45,14 @@ class OnetimeSessionTest < ActiveSupport::TestCase
     assert_not @onetime_session.available?
   end
 
+  test 'onetime session should have a user_id' do
+    assert @onetime_session.user_id
+  end
+
   test 'the sessions should be found by the user' do
-    @user.onetime_session.create
+    onetime_session = @master_session.onetime_session.new
+    onetime_session.user = @user
+    onetime_session.save!
     @onetime_session.update(created_at: 10.days.ago)
     sessions = OnetimeSession.order(:created_at).where(user_id: @user.id)
     assert sessions.size == 2 && !sessions[0].available?

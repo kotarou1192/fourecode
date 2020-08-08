@@ -8,6 +8,7 @@ class MasterSession < ApplicationRecord
   before_create :generate_token
 
   belongs_to :user
+  has_many :onetime_session, dependent: :destroy
 
   def self.new_token
     SecureRandom.hex(64)
