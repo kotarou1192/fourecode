@@ -1,0 +1,9 @@
+
+<div class="box">
+  <h3 class="title">ようこそ、<%= @user.name%>さん</h3>
+  <p class="text">ご登録いただきありがとうございます</p>
+  <p class="oyomikudasai">
+  アカウントを有効化するには下のボタンをクリックして画面の指示に従ってください。
+  </p>
+  <button class="button" onClick="location.href='<%= @url.html_safe %>'">アカウント有効化はこちら</button>
+<div>

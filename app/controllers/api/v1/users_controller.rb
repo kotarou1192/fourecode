@@ -17,7 +17,7 @@ module Api
         end
 
         if @user.save
-          # 何がしかのアクティベートをする
+          @user.send_activation_email
           render json: generate_response(SUCCESS, message: 'activation mail has been sent')
         else
           render json: generate_response(ERROR, messages: @user.errors.messages)
