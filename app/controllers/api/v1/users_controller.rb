@@ -25,29 +25,34 @@ module Api
       end
 
       def show
-        if user_tokens[:onetime]
-          onetime_session = login?(user_tokens[:onetime])
-          if onetime_session && token_availavle?(user_tokens[:onetime])
+        if user_token_from_get_params
+          onetime_session = login?(user_token_from_get_params)
+          if onetime_session && token_availavle?(user_token_from_get_params)
             @session_user = User.find_by(id: onetime_session.user_id)
-          elsif !token_availavle?(user_tokens[:onetime])
+          elsif !token_availavle?(user_token_from_get_params)
             return render json: generate_response(OLD_TOKEN, message: 'onetime token is unavailable')
           end
         end
 
-        selected_user = User.find_by(name: user_name)
-        unless selected_user
+        selected_users = User.where(['name LIKE ?', "#{user_name}%"]).limit(100)
+        if user_name.nil?
           return render json: generate_response(FAILED, message: 'invalid user name')
         end
 
-        body = {
-          name: selected_user.name,
-          nickname: selected_user.nickname,
-          explanation: nil,
-          icon: nil,
-          is_admin: selected_user.admin?,
-          is_mypage: @session_user == selected_user
-        }
+        body = selected_users.map do |selected_user|
+          next unless selected_user.activated?
 
+          p selected_user
+          p @session_user
+          {
+            name: selected_user.name,
+            nickname: selected_user.nickname,
+            explanation: nil,
+            icon: nil,
+            is_admin: selected_user.admin?,
+            is_mypage: @session_user == selected_user
+          }
+        end.compact
         render json: generate_response(SUCCESS, body)
       end
 
@@ -137,6 +142,12 @@ module Api
         return {} if params[:token].nil?
 
         params.require(:token).permit(:onetime, :master)
+      end
+
+      def user_token_from_get_params
+        return nil if params[:token].nil?
+
+        params.require(:token)
       end
 
       def create_sessions

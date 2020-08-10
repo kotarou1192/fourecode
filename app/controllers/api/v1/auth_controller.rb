@@ -28,6 +28,34 @@ module Api
         render json: generate_response(FAILED, message: 'invalid password')
       end
 
+      def index
+        if user_token_from_get_params.nil?
+          return render json: generate_response(FAILED, message: 'property onetime of token is empty')
+        end
+
+        onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
+        unless onetime_session
+          return render json: generate_response(FAILED, message: 'you are not logged in')
+        end
+
+        user = User.find_by(id: onetime_session.user_id)
+        unless onetime_session.available?
+          onetime_session.destroy!
+          return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old.')
+        end
+
+        destroy_old_onetime_sessions(user)
+        body = {
+          name: user.name,
+          nickname: user.nickname,
+          explanation: nil,
+          icon: nil,
+          is_admin: user.admin?,
+          is_mypage: true
+        }
+        render json: generate_response(SUCCESS, body)
+      end
+
       def update
         if user_tokens[:master].nil?
           return render json: generate_response(FAILED, message: 'property master of token is empty')
@@ -107,6 +135,13 @@ module Api
         return {} if params[:token].nil?
 
         params.require(:token).permit(:master, :onetime)
+      end
+
+      def user_token_from_get_params
+        return nil if params[:token].nil?
+        return nil unless params[:token].is_a?(String)
+
+        params.require(:token)
       end
 
       def generate_response(status, body)

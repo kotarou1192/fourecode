@@ -9,6 +9,7 @@ Rails.application.routes.draw do
       post '/auth', to: 'auth#create'
       delete '/auth', to: 'auth#destroy'
       put '/auth', to: 'auth#update'
+      get '/auth', to: 'auth#index'
     end
   end
 end
