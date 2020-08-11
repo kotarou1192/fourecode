@@ -48,7 +48,7 @@ module Api
         body = {
           name: user.name,
           nickname: user.nickname,
-          explanation: nil,
+          explanation: user.explanation,
           icon: user.icon.url,
           is_admin: user.admin?,
           is_mypage: true

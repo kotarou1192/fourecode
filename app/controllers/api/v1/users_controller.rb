@@ -45,7 +45,7 @@ module Api
           {
             name: selected_user.name,
             nickname: selected_user.nickname,
-            explanation: nil,
+            explanation: selected_user.explanation,
             icon: selected_user.icon,
             is_admin: selected_user.admin?,
             is_mypage: @session_user == selected_user
@@ -54,7 +54,7 @@ module Api
         render json: generate_response(SUCCESS, body)
       end
 
-      def update
+      def update_icon
         unless user_tokens_for_update[:onetime]
           return render json: generate_response(FAILED, message: 'property onetime of token is empty')
         end
@@ -65,6 +65,40 @@ module Api
         end
 
         unless token_availavle?(user_tokens_for_update[:onetime])
+          return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
+        end
+
+        selected_user = User.find_by(name: user_name)
+        unless selected_user
+          return render json: generate_response(FAILED, message: 'invalid user name')
+        end
+
+        session_user = onetime_session.user
+
+        unless session_user.admin? || session_user == selected_user
+          return render json: generate_response(ERROR, message: 'you are not admin')
+        end
+
+        if update_icon_selected_user(selected_user)
+          puts SUCCESS
+          render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
+        else
+          puts FAILED
+          render json: generate_response(FAILED, messages: selected_user.errors.messages)
+        end
+      end
+
+      def update
+        unless user_tokens[:onetime]
+          return render json: generate_response(FAILED, message: 'property onetime of token is empty')
+        end
+
+        onetime_session = login?(user_tokens[:onetime])
+        unless onetime_session
+          return render json: generate_response(FAILED, message: 'you are not logged in')
+        end
+
+        unless token_availavle?(user_tokens[:onetime])
           return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
         end
 
@@ -117,18 +151,24 @@ module Api
 
       private
 
+      def update_icon_selected_user(user)
+        user.transaction do
+          user.update!(icon: user_icon) if user_icon
+          return true
+        end
+      rescue ActiveRecord::RecordInvalid
+        false
+      end
+
       def update_selected_user(user)
         user.transaction do
           user.update!(name: user_params[:name]) if user_params[:name]
           if user_params[:nickname]
             user.update!(nickname: user_params[:nickname])
           end
-          user.update!(email: user_params[:email]) if user_params[:email]
-          if user_params[:password]
-            user.password = user_params[:password]
-            user.update!(password_digest: User.digest(user.password))
+          if user_params[:explanation]
+            user.update!(explanation: user_params[:explanation])
           end
-          user.update!(icon: user_icon) if user_icon
           return true
         end
       rescue ActiveRecord::RecordInvalid
@@ -146,7 +186,7 @@ module Api
       def user_params
         return {} if params[:value].nil?
 
-        params.require(:value).permit(:name, :nickname, :email, :password)
+        params.require(:value).permit(:name, :nickname, :email, :password, :explanation)
       end
 
       def user_tokens_for_update

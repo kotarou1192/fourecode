@@ -12,6 +12,7 @@ class User < ApplicationRecord
                     format: { with: VALID_EMAIL_REGEX },
                     uniqueness: true
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
+  validates :explanation, presence: true, length: { maximum: 255 }, allow_nil: true
 
   has_many :master_session, dependent: :destroy
   has_many :onetime_session, dependent: :destroy
