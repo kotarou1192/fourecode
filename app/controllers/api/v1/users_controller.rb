@@ -42,13 +42,11 @@ module Api
         body = selected_users.map do |selected_user|
           next unless selected_user.activated?
 
-          p selected_user
-          p @session_user
           {
             name: selected_user.name,
             nickname: selected_user.nickname,
             explanation: nil,
-            icon: nil,
+            icon: selected_user.icon,
             is_admin: selected_user.admin?,
             is_mypage: @session_user == selected_user
           }
@@ -57,12 +55,16 @@ module Api
       end
 
       def update
-        onetime_session = login?(user_tokens[:onetime])
+        unless user_tokens_for_update[:onetime]
+          return render json: generate_response(FAILED, message: 'property onetime of token is empty')
+        end
+
+        onetime_session = login?(user_tokens_for_update[:onetime])
         unless onetime_session
           return render json: generate_response(FAILED, message: 'you are not logged in')
         end
 
-        unless token_availavle?(user_tokens[:onetime])
+        unless token_availavle?(user_tokens_for_update[:onetime])
           return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
         end
 
@@ -78,8 +80,10 @@ module Api
         end
 
         if update_selected_user(selected_user)
+          puts SUCCESS
           render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
         else
+          puts FAILED
           render json: generate_response(FAILED, messages: selected_user.errors.messages)
         end
       end
@@ -124,6 +128,7 @@ module Api
             user.password = user_params[:password]
             user.update!(password_digest: User.digest(user.password))
           end
+          user.update!(icon: user_icon) if user_icon
           return true
         end
       rescue ActiveRecord::RecordInvalid
@@ -134,8 +139,20 @@ module Api
         params.permit(:id)[:id]
       end
 
+      def user_icon
+        p params.permit(:icon)[:icon]
+      end
+
       def user_params
+        return {} if params[:value].nil?
+
         params.require(:value).permit(:name, :nickname, :email, :password)
+      end
+
+      def user_tokens_for_update
+        return {} if params[:token].nil?
+
+        ActionController::Parameters.new(JSON.parse(params.require(:token))).require(:token).permit(:onetime, :master)
       end
 
       def user_tokens
@@ -147,7 +164,7 @@ module Api
       def user_token_from_get_params
         return nil if params[:token].nil?
 
-        params.require(:token)
+        params.permit(:token)[:token]
       end
 
       def create_sessions

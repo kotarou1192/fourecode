@@ -36,3 +36,4 @@
 /config/environments/production.rb
 nohup.out
 memo.json
+/public/uploads/*

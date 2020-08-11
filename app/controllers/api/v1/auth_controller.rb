@@ -49,7 +49,7 @@ module Api
           name: user.name,
           nickname: user.nickname,
           explanation: nil,
-          icon: nil,
+          icon: user.icon.url,
           is_admin: user.admin?,
           is_mypage: true
         }
@@ -81,11 +81,11 @@ module Api
 
       # log-out
       def destroy
-        if user_tokens[:onetime].nil?
+        if user_token_from_get_params.nil?
           return render json: generate_response(FAILED, message: 'you are not logged in')
         end
 
-        onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_tokens[:onetime]))
+        onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
         unless onetime_session
           return render json: generate_response(FAILED, message: 'you are not logged in')
         end
@@ -141,7 +141,7 @@ module Api
         return nil if params[:token].nil?
         return nil unless params[:token].is_a?(String)
 
-        params.require(:token)
+        params.permit(:token)[:token]
       end
 
       def generate_response(status, body)

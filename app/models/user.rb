@@ -16,6 +16,8 @@ class User < ApplicationRecord
   has_many :master_session, dependent: :destroy
   has_many :onetime_session, dependent: :destroy
 
+  mount_uploader :icon, ImageUploader
+
   def self.new_token
     SecureRandom.hex(64)
   end
