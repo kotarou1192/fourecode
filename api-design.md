@@ -6,12 +6,15 @@
 - body
   - 内容
   
-### 送信時に必要なjson
+### 送信時に必要なjson(POST, PUT)
 - value
   - 内容
 - token
   - master(null可能)
   - onetime(null不可)
+
+### 送信時に必要なjson(GET, DELETE)
+- token(onetimeトークン)
 
 ### token管理
 

@@ -28,7 +28,7 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     body = JSON.parse(response.body)
     _master_token = body['body']['token']['master']
     onetime_token = body['body']['token']['onetime']
-    delete '/api/v1/auth', params: { token: { onetime: onetime_token } }
+    delete '/api/v1/auth', params: { token: onetime_token }
     assert_not MasterSession.find_by(user_id: @user.id) && OnetimeSession.find_by(user_id: @user.id)
   end
 end
