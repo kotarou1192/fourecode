@@ -43,6 +43,19 @@ class User < ApplicationRecord
     UserMailer.account_activation(self).deliver_now
   end
 
+  def update_icon(base64_encoded_image)
+    raise ArgumentError, 'image is empty' unless base64_encoded_image
+
+    image = Base64.decode64(base64_encoded_image)
+
+    file = Tempfile.open
+    file.write image.force_encoding('UTF-8')
+
+    update!(icon: file)
+  ensure
+    file.unlink
+  end
+
   private
 
   # メールアドレスをすべて小文字にする

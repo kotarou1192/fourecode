@@ -54,40 +54,6 @@ module Api
         render json: generate_response(SUCCESS, body)
       end
 
-      def update_icon
-        unless user_tokens[:onetime]
-          return render json: generate_response(FAILED, message: 'property onetime of token is empty')
-        end
-
-        onetime_session = login?(user_tokens[:onetime])
-        unless onetime_session
-          return render json: generate_response(FAILED, message: 'you are not logged in')
-        end
-
-        unless token_availavle?(user_tokens[:onetime])
-          return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
-        end
-
-        selected_user = User.find_by(name: user_name)
-        unless selected_user
-          return render json: generate_response(FAILED, message: 'invalid user name')
-        end
-
-        session_user = onetime_session.user
-
-        unless session_user.admin? || session_user == selected_user
-          return render json: generate_response(ERROR, message: 'you are not admin')
-        end
-
-        if update_selected_user_icon(selected_user)
-          puts SUCCESS
-          render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
-        else
-          puts FAILED
-          render json: generate_response(FAILED, messages: selected_user.errors.messages)
-        end
-      end
-
       def update
         unless user_tokens[:onetime]
           return render json: generate_response(FAILED, message: 'property onetime of token is empty')
@@ -151,23 +117,6 @@ module Api
 
       private
 
-      def update_selected_user_icon(user)
-        return false unless user_icon[:base64_encoded_image]
-
-        base64_encoded_image = user_icon[:base64_encoded_image]
-        image = Base64.decode64(base64_encoded_image)
-
-        file = Tempfile.open
-        file.write image.force_encoding('UTF-8')
-
-        user.update!(icon: file)
-        true
-      rescue ActiveRecord::RecordInvalid
-        false
-      ensure
-        file.unlink
-      end
-
       def update_selected_user(user)
         user.transaction do
           user.update!(name: user_params[:name]) if user_params[:name]
@@ -176,6 +125,9 @@ module Api
           end
           if user_params[:explanation]
             user.update!(explanation: user_params[:explanation])
+          end
+          if user_params[:image] && user_params[:image][:base64_encoded_image]
+            user.update_icon(user_params[:image][:base64_encoded_image])
           end
           return true
         end
@@ -187,14 +139,10 @@ module Api
         params.permit(:id)[:id]
       end
 
-      def user_icon
-        params.require(:value).require(:image).permit(:name, :base64_encoded_image)
-      end
-
       def user_params
         return {} if params[:value].nil?
 
-        params.require(:value).permit(:name, :nickname, :email, :password, :explanation)
+        params.require(:value).permit(:name, :nickname, :email, :password, :explanation, image: %i[name base64_encoded_image])
       end
 
       def user_tokens
