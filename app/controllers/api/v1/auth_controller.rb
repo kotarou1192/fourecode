@@ -44,7 +44,7 @@ module Api
           return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old.')
         end
 
-        destroy_old_onetime_sessions(user)
+        destroy_old_sessions(user)
         body = {
           name: user.name,
           nickname: user.nickname,
@@ -72,7 +72,7 @@ module Api
           return render json: generate_response(OLD_TOKEN, message: 'master token is too old.')
         end
 
-        destroy_old_onetime_sessions(user)
+        destroy_old_sessions(user)
         onetime_session = master_session.onetime_session.new
         onetime_session.user = user
         onetime_session.save!
@@ -102,7 +102,13 @@ module Api
 
       private
 
-      def destroy_old_onetime_sessions(user)
+      def destroy_old_sessions(user)
+        master_sessions = MasterSession.where(user_id: user.id)
+        ActiveRecord::Base.transaction do |master_session|
+          master_sessions.each do
+            master_session.destroy! unless master_session.available?
+          end
+        end
         onetime_sessions = OnetimeSession.where(user_id: user.id)
         ActiveRecord::Base.transaction do
           onetime_sessions.each do |session|
