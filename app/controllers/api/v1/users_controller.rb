@@ -55,16 +55,16 @@ module Api
       end
 
       def update_icon
-        unless user_tokens_for_update[:onetime]
+        unless user_tokens[:onetime]
           return render json: generate_response(FAILED, message: 'property onetime of token is empty')
         end
 
-        onetime_session = login?(user_tokens_for_update[:onetime])
+        onetime_session = login?(user_tokens[:onetime])
         unless onetime_session
           return render json: generate_response(FAILED, message: 'you are not logged in')
         end
 
-        unless token_availavle?(user_tokens_for_update[:onetime])
+        unless token_availavle?(user_tokens[:onetime])
           return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
         end
 
@@ -79,7 +79,7 @@ module Api
           return render json: generate_response(ERROR, message: 'you are not admin')
         end
 
-        if update_icon_selected_user(selected_user)
+        if update_selected_user_icon(selected_user)
           puts SUCCESS
           render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
         else
@@ -151,13 +151,21 @@ module Api
 
       private
 
-      def update_icon_selected_user(user)
-        user.transaction do
-          user.update!(icon: user_icon) if user_icon
-          return true
-        end
+      def update_selected_user_icon(user)
+        return false unless user_icon[:base64_encoded_image]
+
+        base64_encoded_image = user_icon[:base64_encoded_image]
+        image = Base64.decode64(base64_encoded_image)
+
+        file = Tempfile.open
+        file.write image.force_encoding('UTF-8')
+
+        user.update!(icon: file)
+        true
       rescue ActiveRecord::RecordInvalid
         false
+      ensure
+        file.unlink
       end
 
       def update_selected_user(user)
@@ -180,19 +188,13 @@ module Api
       end
 
       def user_icon
-        p params.permit(:icon)[:icon]
+        params.require(:value).require(:image).permit(:name, :base64_encoded_image)
       end
 
       def user_params
         return {} if params[:value].nil?
 
         params.require(:value).permit(:name, :nickname, :email, :password, :explanation)
-      end
-
-      def user_tokens_for_update
-        return {} if params[:token].nil?
-
-        ActionController::Parameters.new(JSON.parse(params.require(:token))).require(:token).permit(:onetime, :master)
       end
 
       def user_tokens
