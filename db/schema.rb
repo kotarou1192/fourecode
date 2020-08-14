@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_11_145804) do
+ActiveRecord::Schema.define(version: 2020_08_14_115929) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,6 +31,13 @@ ActiveRecord::Schema.define(version: 2020_08_11_145804) do
     t.index ["master_session_id"], name: "index_onetime_sessions_on_master_session_id"
   end
 
+  create_table "password_reset_sessions", force: :cascade do |t|
+    t.string "user_id"
+    t.string "token_digest"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "users", id: :string, limit: 36, force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -49,4 +56,5 @@ ActiveRecord::Schema.define(version: 2020_08_11_145804) do
   add_foreign_key "master_sessions", "users"
   add_foreign_key "onetime_sessions", "master_sessions"
   add_foreign_key "onetime_sessions", "users"
+  add_foreign_key "password_reset_sessions", "users"
 end

@@ -16,6 +16,7 @@ class User < ApplicationRecord
 
   has_many :master_session, dependent: :destroy
   has_many :onetime_session, dependent: :destroy
+  has_one :password_reset_session, dependent: :destroy
 
   mount_uploader :icon, ImageUploader
 
@@ -43,6 +44,10 @@ class User < ApplicationRecord
     UserMailer.account_activation(self).deliver_now
   end
 
+  def send_password_reset_email
+    UserMailer.password_reset(self).deliver_now
+  end
+
   def update_icon(base64_encoded_image)
     raise ArgumentError, 'image is empty' unless base64_encoded_image
 
@@ -54,6 +59,11 @@ class User < ApplicationRecord
     update!(icon: file)
   ensure
     file.unlink
+  end
+
+  # パスワードを暗号化して代入する
+  def create_password_digest
+    self.password_digest = User.digest(password)
   end
 
   private
@@ -76,10 +86,5 @@ class User < ApplicationRecord
       break unless User.find_by(id: @uuid)
     end
     self.id = @uuid
-  end
-
-  # パスワードを暗号化して代入する
-  def create_password_digest
-    self.password_digest = User.digest(password)
   end
 end

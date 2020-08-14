@@ -10,6 +10,8 @@ Rails.application.routes.draw do
       delete '/auth', to: 'auth#destroy'
       put '/auth', to: 'auth#update'
       get '/auth', to: 'auth#index'
+      post '/password_resets', to: 'password_resets#create'
+      put '/password_resets', to: 'password_resets#update'
     end
   end
 end
