@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class UserMailer < ApplicationMailer
+  PROTOCOL = 'http'
+  DOMAIN = 'localhost:3000'
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
   #
@@ -8,14 +10,12 @@ class UserMailer < ApplicationMailer
   #
   def account_activation(user)
     @user = user
-    domain = 'localhost:3000'
-    protocol = 'http'
     @user.activation_token
     body = {
       token: @user.activation_token,
       email: @user.email
     }
-    @url = url_with_params("#{protocol}://#{domain}/account/activate", body)
+    @url = url_with_params("#{PROTOCOL}://#{DOMAIN}/account/activate", body)
     mail to: @user.email
   end
 
@@ -32,13 +32,11 @@ class UserMailer < ApplicationMailer
   #
   def password_reset(user)
     @user = user
-    domain = 'localhost:3000'
-    protocol = 'http'
     password_reset_session = user.create_password_reset_session
     body = {
       token: password_reset_session.token
     }
-    @url = url_with_params("#{protocol}://#{domain}/password/edit", body)
+    @url = url_with_params("#{PROTOCOL}://#{DOMAIN}/password/edit", body)
     mail to: @user.email
   end
 end
