@@ -36,7 +36,7 @@ class Api::V1::PasswordResetsController < ApplicationController
       return render json: generate_response(SUCCESS, message: 'your password has been changed')
     end
 
-    render json: generate_response(FAILED, messages: user.errors.messages)
+    render json: generate_response(FAILED, message: user.errors.messages)
   end
 
   # POSTで呼び出す

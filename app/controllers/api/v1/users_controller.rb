@@ -13,14 +13,14 @@ module Api
       def create
         @user = User.new(user_params)
         unless @user.valid?
-          return render json: generate_response(FAILED, messages: @user.errors.messages)
+          return render json: generate_response(FAILED, message: @user.errors.messages)
         end
 
         if @user.save
           @user.send_activation_email
           render json: generate_response(SUCCESS, message: 'activation mail has been sent')
         else
-          render json: generate_response(ERROR, messages: @user.errors.messages)
+          render json: generate_response(ERROR, message: @user.errors.messages)
         end
       end
 
@@ -84,7 +84,7 @@ module Api
           render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
         else
           puts FAILED
-          render json: generate_response(FAILED, messages: selected_user.errors.messages)
+          render json: generate_response(FAILED, message: selected_user.errors.messages)
         end
       end
 
@@ -111,7 +111,7 @@ module Api
         if selected_user.destroy
           render json: generate_response(SUCCESS, message: 'user is deleted successfully')
         else
-          render json: generate_response(FAILED, messages: selected_user.errors.messages)
+          render json: generate_response(FAILED, message: selected_user.errors.messages)
         end
       end
 
