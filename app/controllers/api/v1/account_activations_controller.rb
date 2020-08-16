@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Api::V1::AccountActivationsController < ApplicationController
+  include ErrorMessageHelper
+
   def update
     user = User.find_by(email: params[:value][:email])
 
@@ -8,7 +10,9 @@ class Api::V1::AccountActivationsController < ApplicationController
       user.activate
       render json: { status: 'SUCCESS', body: { message: 'activated' } }
     else
-      render status: 400, json: { status: 'ERROR', message: 'invalid activation link' }
+      message = 'invalid activation link'
+      render status: 400, json: { status: 'ERROR', message: message }
+        .merge(error_messages(key: 'link', message: message))
     end
   end
 end
