@@ -6,9 +6,9 @@
   "message": "message",
   "errors": [
       {
-          "key": "link",
+          "key": "タイプ(個別に言及あり)",
           "messages": [
-              "invalid activation link"
+              "メッセージの配列"
           ],
           "code": null
       }
