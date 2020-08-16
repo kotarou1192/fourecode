@@ -34,7 +34,7 @@ module Api
         if user_token_from_get_params.nil?
           message = 'property onetime of token is empty'
           return render status: 400, json: generate_response(FAILED, message: message)
-                 .merge(error_messages(key: token, message: message))
+                 .merge(error_messages(key: 'token', message: message))
         end
 
         onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
