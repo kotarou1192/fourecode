@@ -8,7 +8,7 @@ class Api::V1::AccountActivationsController < ApplicationController
       user.activate
       render json: { status: 'SUCCESS', body: { message: 'activated' } }
     else
-      render json: { status: 'ERROR', message: 'invalid activation link' }
+      render status: 400, json: { status: 'ERROR', message: 'invalid activation link' }
     end
   end
 end

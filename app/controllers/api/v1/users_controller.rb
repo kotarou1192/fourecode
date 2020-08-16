@@ -13,14 +13,14 @@ module Api
       def create
         @user = User.new(user_params)
         unless @user.valid?
-          return render json: generate_response(FAILED, message: @user.errors.messages)
+          return render status: 400, json: generate_response(FAILED, message: @user.errors.messages)
         end
 
         if @user.save
           @user.send_activation_email
           render json: generate_response(SUCCESS, message: 'activation mail has been sent')
         else
-          render json: generate_response(ERROR, message: @user.errors.messages)
+          render status: 400, json: generate_response(ERROR, message: @user.errors.messages)
         end
       end
 
@@ -30,13 +30,13 @@ module Api
           if onetime_session && token_availavle?(user_token_from_get_params)
             @session_user = User.find_by(id: onetime_session.user_id)
           elsif !token_availavle?(user_token_from_get_params)
-            return render json: generate_response(OLD_TOKEN, message: 'onetime token is unavailable')
+            return render status: 400, json: generate_response(OLD_TOKEN, message: 'onetime token is unavailable')
           end
         end
 
         selected_users = User.where(['name LIKE ?', "#{user_name}%"]).limit(100)
         if user_name.nil?
-          return render json: generate_response(FAILED, message: 'invalid user name')
+          return render status: 400, json: generate_response(FAILED, message: 'invalid user name')
         end
 
         body = selected_users.map do |selected_user|
@@ -56,27 +56,27 @@ module Api
 
       def update
         unless user_tokens[:onetime]
-          return render json: generate_response(FAILED, message: 'property onetime of token is empty')
+          return render status: 400, json: generate_response(FAILED, message: 'property onetime of token is empty')
         end
 
         onetime_session = login?(user_tokens[:onetime])
         unless onetime_session
-          return render json: generate_response(FAILED, message: 'you are not logged in')
+          return render status: 400, json: generate_response(FAILED, message: 'you are not logged in')
         end
 
         unless token_availavle?(user_tokens[:onetime])
-          return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
+          return render status: 400, json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
         end
 
         selected_user = User.find_by(name: user_name)
         unless selected_user
-          return render json: generate_response(FAILED, message: 'invalid user name')
+          return render status: 400, json: generate_response(FAILED, message: 'invalid user name')
         end
 
         session_user = onetime_session.user
 
         unless session_user.admin? || session_user == selected_user
-          return render json: generate_response(ERROR, message: 'you are not admin')
+          return render status: 400, json: generate_response(ERROR, message: 'you are not admin')
         end
 
         if update_selected_user(selected_user)
@@ -84,34 +84,34 @@ module Api
           render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
         else
           puts FAILED
-          render json: generate_response(FAILED, message: selected_user.errors.messages)
+          render status: 400, json: generate_response(FAILED, message: selected_user.errors.messages)
         end
       end
 
       def destroy
         onetime_session = login?(user_tokens[:onetime])
         unless onetime_session
-          return render json: generate_response(FAILED, message: 'you are not logged in')
+          return render status: 400, json: generate_response(FAILED, message: 'you are not logged in')
         end
 
         unless token_availavle?(user_tokens[:onetime])
-          return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
+          return render status: 400, json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
         end
 
         session_user = onetime_session.user
         selected_user = User.find_by(name: user_name)
         unless selected_user
-          return render json: generate_response(FAILED, message: 'invalid user name')
+          return render status: 400, json: generate_response(FAILED, message: 'invalid user name')
         end
 
         unless session_user.admin? || session_user == selected_user
-          return render json: generate_response(ERROR, message: 'you are not admin')
+          return render status: 400, json: generate_response(ERROR, message: 'you are not admin')
         end
 
         if selected_user.destroy
           render json: generate_response(SUCCESS, message: 'user is deleted successfully')
         else
-          render json: generate_response(FAILED, message: selected_user.errors.messages)
+          render status: 400, json: generate_response(FAILED, message: selected_user.errors.messages)
         end
       end
 

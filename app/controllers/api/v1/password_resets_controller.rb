@@ -17,15 +17,15 @@ class Api::V1::PasswordResetsController < ApplicationController
   def update
     session = PasswordResetSession.find_by(token_digest: PasswordResetSession.digest(token))
     unless session
-      return render json: generate_response(FAILED, message: 'invalid reset link')
+      return render status: 400, json: generate_response(FAILED, message: 'invalid reset link')
     end
 
     unless session.available?
-      return render json: generate_response(FAILED, message: 'the link is too old')
+      return render status: 400, json: generate_response(FAILED, message: 'the link is too old')
     end
 
     unless user_params[:password]
-      return render json: generate_response(FAILED, message: 'password does not exit')
+      return render status: 400, json: generate_response(FAILED, message: 'password does not exit')
     end
 
     user = session.user
@@ -36,7 +36,7 @@ class Api::V1::PasswordResetsController < ApplicationController
       return render json: generate_response(SUCCESS, message: 'your password has been changed')
     end
 
-    render json: generate_response(FAILED, message: user.errors.messages)
+    render status: 400, json: generate_response(FAILED, message: user.errors.messages)
   end
 
   # POSTで呼び出す
@@ -49,10 +49,10 @@ class Api::V1::PasswordResetsController < ApplicationController
   def create
     user = User.find_by(email: user_params[:email])
     unless user
-      return render json: generate_response(FAILED, message: 'the email address does not exist')
+      return render status: 400, json: generate_response(FAILED, message: 'the email address does not exist')
     end
     unless user.activated?
-      return render json: generate_response(FAILED, message: 'account is not activated')
+      return render status: 400, json: generate_response(FAILED, message: 'account is not activated')
     end
 
     user.send_password_reset_email
