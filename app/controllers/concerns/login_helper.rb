@@ -2,7 +2,7 @@
 
 module LoginHelper
   extend ActiveSupport::Concern
-  def token_availavle?(onetime_token)
+  def token_available?(onetime_token)
     onetime_session = login?(onetime_token)
     return false unless onetime_session&.available?
 

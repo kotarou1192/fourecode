@@ -30,9 +30,9 @@ module Api
       def show
         if user_token_from_get_params
           onetime_session = login?(user_token_from_get_params)
-          if onetime_session && token_availavle?(user_token_from_get_params)
+          if onetime_session && token_available?(user_token_from_get_params)
             @session_user = User.find_by(id: onetime_session.user_id)
-          elsif !token_availavle?(user_token_from_get_params)
+          elsif !token_available?(user_token_from_get_params)
             message = 'onetime token is unavailable'
             return render status: 400, json: generate_response(OLD_TOKEN, message: message)
                    .merge(error_messages(key: 'token', message: message))
@@ -75,7 +75,7 @@ module Api
                  .merge(error_messages(key: 'login', message: message))
         end
 
-        unless token_availavle?(user_tokens[:onetime])
+        unless token_available?(user_tokens[:onetime])
           message = 'onetime token is too old'
           return render status: 400, json: generate_response(OLD_TOKEN, message: message)
                  .merge(error_messages(key: 'token', message: message))
@@ -114,7 +114,7 @@ module Api
                  .merge(error_messages(key: 'login', message: message))
         end
 
-        unless token_availavle?(user_tokens[:onetime])
+        unless token_available?(user_tokens[:onetime])
           message = 'onetime token is too old'
           return render status: 400, json: generate_response(OLD_TOKEN, message: message)
                  .merge(error_messages(key: 'token', message: message))
