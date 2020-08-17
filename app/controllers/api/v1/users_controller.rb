@@ -97,10 +97,8 @@ module Api
         end
 
         if update_selected_user(selected_user)
-          puts SUCCESS
           render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
         else
-          puts FAILED
           render status: 400, json: generate_response(FAILED, nil)
                                       .merge(error_messages(error_messages: generate_error_messages_from_errors(selected_user.errors.messages)))
         end
