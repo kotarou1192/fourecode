@@ -3,6 +3,8 @@
 module Api
   module V1
     class AuthController < ApplicationController
+      include ErrorMessageHelper
+
       SUCCESS = 'SUCCESS'
       FAILED = 'FAILED'
       ERROR = 'ERROR'
@@ -13,11 +15,11 @@ module Api
 
         user = User.find_by(email: user_params[:email].downcase)
         unless user
-          return render json: generate_response(FAILED, message: 'invalid email address')
+          return render status: 400, json: generate_response(FAILED, nil)
         end
 
         unless user.activated?
-          return render json: generate_response(FAILED, message: 'account is not activated')
+          return render status: 400, json: generate_response(FAILED, nil)
         end
 
         if user&.authenticated?(:password, user_params[:password])
@@ -25,23 +27,29 @@ module Api
           return render json: generate_response(SUCCESS, token: { master: @master_session.token, onetime: @onetime_session.token })
         end
 
-        render json: generate_response(FAILED, message: 'invalid password')
+        render status: 400, json: generate_response(FAILED, nil)
       end
 
       def index
         if user_token_from_get_params.nil?
-          return render json: generate_response(FAILED, message: 'property onetime of token is empty')
+          message = 'property onetime of token is empty'
+          return render status: 400, json: generate_response(FAILED, message: message)
+                 .merge(error_messages(key: 'token', message: message))
         end
 
         onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
         unless onetime_session
-          return render json: generate_response(FAILED, message: 'you are not logged in')
+          message = 'you are not logged in'
+          return render status: 400, json: generate_response(FAILED, message: message)
+                 .merge(error_messages(key: 'login', message: message))
         end
 
         user = User.find_by(id: onetime_session.user_id)
         unless onetime_session.available?
           onetime_session.destroy!
-          return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old.')
+          message = 'onetime token is too old'
+          return render status: 400, json: generate_response(OLD_TOKEN, message: message)
+                 .merge(error_messages(key: 'token', message: message))
         end
 
         destroy_old_sessions(user)
@@ -58,18 +66,24 @@ module Api
 
       def update
         if user_tokens[:master].nil?
-          return render json: generate_response(FAILED, message: 'property master of token is empty')
+          message = 'property master of token is empty'
+          return render status: 400, json: generate_response(FAILED, message: message)
+                 .merge(error_messages(key: 'token', message: message))
         end
 
         master_session = MasterSession.find_by(token_digest: MasterSession.digest(user_tokens[:master]))
         unless master_session
-          return render json: generate_response(FAILED, message: 'you are not logged in')
+          message = 'you are not logged in'
+          return render status: 400, json: generate_response(FAILED, message: message)
+                 .merge(error_messages(key: 'login', message: message))
         end
 
         user = User.find_by(id: master_session.user_id)
         unless master_session.available?
           master_session.destroy!
-          return render json: generate_response(OLD_TOKEN, message: 'master token is too old.')
+          message = 'master token is too old'
+          return render status: 400, json: generate_response(OLD_TOKEN, message: message)
+                 .merge(error_messages(key: 'token', message: message))
         end
 
         destroy_old_sessions(user)
@@ -82,17 +96,23 @@ module Api
       # log-out
       def destroy
         if user_token_from_get_params.nil?
-          return render json: generate_response(FAILED, message: 'you are not logged in')
+          message = 'you are not logged in'
+          return render status: 400, json: generate_response(FAILED, message: message)
+                 .merge(error_messages(key: 'login', message: message))
         end
 
         onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
         unless onetime_session
-          return render json: generate_response(FAILED, message: 'you are not logged in')
+          message = 'you are not logged in'
+          return render status: 400, json: generate_response(FAILED, message: message)
+                 .merge(error_messages(key: 'login', message: message))
         end
 
         unless onetime_session.available?
           onetime_session.destroy!
-          return render json: generate_response(OLD_TOKEN, message: 'onetime token is too old')
+          message = 'onetime token is too old'
+          return render status: 400, json: generate_response(OLD_TOKEN, message: message)
+                 .merge(error_messages(key: 'token', message: message))
         end
 
         user = User.find_by(id: onetime_session.user_id)
