@@ -131,14 +131,14 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     assert_not MasterSession.find_by(user_id: @user.id) && OnetimeSession.find_by(user_id: @user.id)
   end
 
-  test 'user could not be logged out with empty token' do
+  test 'user can not be logged out with empty token' do
     master, onetime = create_sessions
     delete '/api/v1/auth', params: { token: nil }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'login'
   end
 
-  test 'user could not be logged out with old token' do
+  test 'user can not be logged out with old token' do
     master, onetime = create_sessions
     onetime.update(created_at: 100.days.ago)
     delete '/api/v1/auth', params: { token: onetime.token }
@@ -146,7 +146,7 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     assert response.status == 400 && body['errors'][0]['key'] == 'token'
   end
 
-  test 'user could not be logged out with invalid token' do
+  test 'user can not be logged out with invalid token' do
     master, onetime = create_sessions
     delete '/api/v1/auth', params: { token: 'hogefuga' }
     body = JSON.parse(response.body)
