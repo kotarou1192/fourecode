@@ -26,7 +26,7 @@ class OnetimeSession < ApplicationRecord
 
   def generate_token
     100.times do
-      self.token = OnetimeSession.new_token
+      self.token = user.id + '_' + OnetimeSession.new_token
       self.token_digest = OnetimeSession.digest(token)
       break unless OnetimeSession.find_by(token_digest: token_digest)
     end
