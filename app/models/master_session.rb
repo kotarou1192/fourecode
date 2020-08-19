@@ -26,7 +26,7 @@ class MasterSession < ApplicationRecord
 
   def generate_token
     100.times do
-      self.token = MasterSession.new_token
+      self.token = user.id + '_' + MasterSession.new_token
       self.token_digest = MasterSession.digest(token)
       break unless MasterSession.find_by(token_digest: token_digest)
     end
