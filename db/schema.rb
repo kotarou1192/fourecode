@@ -39,13 +39,14 @@ ActiveRecord::Schema.define(version: 2020_08_20_034203) do
   end
 
   create_table "posts", force: :cascade do |t|
-    t.integer "bestanwser_reward"
+    t.integer "bestanswer_reward"
     t.string "source_url"
     t.string "state", default: "accepting"
     t.text "body"
     t.text "code"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "user_id"
   end
 
   create_table "users", id: :string, limit: 36, force: :cascade do |t|
@@ -67,4 +68,5 @@ ActiveRecord::Schema.define(version: 2020_08_20_034203) do
   add_foreign_key "onetime_sessions", "master_sessions"
   add_foreign_key "onetime_sessions", "users"
   add_foreign_key "password_reset_sessions", "users"
+  add_foreign_key "posts", "users"
 end
