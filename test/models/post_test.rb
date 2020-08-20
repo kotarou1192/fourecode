@@ -45,4 +45,14 @@ class PostTest < ActiveSupport::TestCase
     @post.change_state 'voting'
     assert @post.state == 'voting'
   end
+
+  test 'body should be present' do
+    @post.body = ' ' * 6
+    assert_not @post.valid?
+  end
+
+  test 'code should be present' do
+    @post.code = ' ' * 6
+    assert_not @post.valid?
+  end
 end
