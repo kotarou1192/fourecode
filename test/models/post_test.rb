@@ -21,7 +21,7 @@ class PostTest < ActiveSupport::TestCase
     @answer_user.save
     @answer_user.activate
 
-    @post = @user.post.new
+    @post = @user.posts.new
     @post.source_url = "http://hogehoge.com/hoge"
     @post.body = 'この命名、きれい？'
     @post.code = 'puts hello'
