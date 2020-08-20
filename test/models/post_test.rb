@@ -55,4 +55,12 @@ class PostTest < ActiveSupport::TestCase
     @post.code = ' ' * 6
     assert_not @post.valid?
   end
+
+  test 'invalid status should be rejected' do
+    begin
+      @post.change_state 'hoge'
+    rescue => error
+      assert error.is_a? ArgumentError
+    end
+  end
 end
