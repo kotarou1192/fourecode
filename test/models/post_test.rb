@@ -63,4 +63,9 @@ class PostTest < ActiveSupport::TestCase
       assert error.is_a? ArgumentError
     end
   end
+
+  test 'asked user should be set' do
+    @post.ask_to([@answer_user])
+    assert AskedUser.find_by(user_id: @answer_user.id)
+  end
 end
