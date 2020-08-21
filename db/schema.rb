@@ -10,10 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_20_034203) do
+ActiveRecord::Schema.define(version: 2020_08_20_070623) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "asked_users", force: :cascade do |t|
+    t.string "user_id"
+    t.bigint "post_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["post_id"], name: "index_asked_users_on_post_id"
+  end
 
   create_table "master_sessions", force: :cascade do |t|
     t.string "user_id"
@@ -64,6 +72,8 @@ ActiveRecord::Schema.define(version: 2020_08_20_034203) do
     t.string "explanation"
   end
 
+  add_foreign_key "asked_users", "posts"
+  add_foreign_key "asked_users", "users"
   add_foreign_key "master_sessions", "users"
   add_foreign_key "onetime_sessions", "master_sessions"
   add_foreign_key "onetime_sessions", "users"
