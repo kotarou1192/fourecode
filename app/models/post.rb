@@ -6,6 +6,7 @@ class Post < ApplicationRecord
   validates :body, presence: true
   validates :code, presence: true
 
+  has_many :asked_users, dependent: :destroy
   belongs_to :user
 
   def change_state(state)
