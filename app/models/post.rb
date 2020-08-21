@@ -25,6 +25,18 @@ class Post < ApplicationRecord
     state == 'resolved'
   end
 
+  def ask_to(users)
+    raise ArgumentError, 'argument type must be array' unless users.is_a? Array
+
+    transaction do
+      users.each do |user|
+        answer_request = user.asked_users.new
+        answer_request.post = self
+        answer_request.save!
+      end
+    end
+  end
+
   private
 
   def set_default_reward
