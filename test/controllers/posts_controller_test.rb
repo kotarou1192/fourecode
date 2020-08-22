@@ -100,4 +100,25 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     post '/api/v1/posts', params: { token: { onetime: o.token }, value: { title: title, body: body, code: code, source_url: source_url, bestanswer_reward: reward } }
     assert response.status == 400
   end
+
+  # test to get
+
+  test 'the post should be got' do
+    user_post = @user.posts.create(title: 'test', body: 'test', code: 'code', source_url: 'test')
+    get "/api/v1/posts/#{user_post.id}", params: { token: 'none' }
+    body = JSON.parse(response.body)
+    assert body['status'] == 'SUCCESS'
+
+    assert body['body']['code'] == user_post.code
+  end
+
+  test 'my post should be mine' do
+    m, o = create_sessions
+    user_post = @user.posts.create(title: 'test', body: 'test', code: 'code', source_url: 'test')
+    get "/api/v1/posts/#{user_post.id}", params: { token: o.token }
+    body = JSON.parse(response.body)
+    assert body['status'] == 'SUCCESS'
+
+    assert body['body']['is_mine'] == true
+  end
 end
