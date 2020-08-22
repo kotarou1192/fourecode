@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class UserMailer < ApplicationMailer
-  PROTOCOL = 'http'
-  DOMAIN = 'localhost:3000'
+  PROTOCOL = 'https'
+  DOMAIN = 'takashiii-hq.com'
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
   #
