@@ -3,11 +3,14 @@ class Post < ApplicationRecord
   DEFINED_STATES = %w[accepting voting resolved].freeze
   MAX_REWARD = 500
   MIN_REWARD = 0
+  BODY_MAX_CHARS = 10000
+  CODE_MAX_CHARS = 10000
+  TITLE_MAX_CHARS = 100
 
   before_save :set_default_reward
-  validates :title, presence: true
-  validates :body, presence: true
-  validates :code, presence: true
+  validates :title, presence: true, length: { maximum: TITLE_MAX_CHARS }
+  validates :body, presence: true, length: { maximum: BODY_MAX_CHARS }
+  validates :code, presence: true, length: { maximum: CODE_MAX_CHARS }
   validates :bestanswer_reward, numericality: { greater_than_or_equal_to: MIN_REWARD, less_than_or_equal_to: MAX_REWARD }, allow_nil: true
   validates :source_url, presence: true, if: :url_exists?, allow_nil: true
 
