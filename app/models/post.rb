@@ -1,10 +1,14 @@
 class Post < ApplicationRecord
   DEFAULT_REWARD = 100
   DEFINED_STATES = %w[accepting voting resolved].freeze
+  MAX_REWARD = 500
+  MIN_REWARD = 0
 
   before_save :set_default_reward
   validates :body, presence: true
   validates :code, presence: true
+  validates :bestanswer_reward, numericality: { greater_than_or_equal_to: MIN_REWARD, less_than_or_equal_to: MAX_REWARD }, allow_nil: true
+  validates :source_url, presence: true, if: :url_exists?, allow_nil: true
 
   has_many :asked_users, dependent: :destroy
   belongs_to :user
@@ -42,5 +46,9 @@ class Post < ApplicationRecord
 
   def set_default_reward
     self.bestanswer_reward ||= DEFAULT_REWARD
+  end
+
+  def url_exists?
+    source_url != ''
   end
 end
