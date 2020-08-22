@@ -65,6 +65,7 @@ class PostTest < ActiveSupport::TestCase
   end
 
   test 'asked user should be set' do
+    @post.save
     @post.ask_to([@answer_user])
     assert AskedUser.find_by(user_id: @answer_user.id)
   end

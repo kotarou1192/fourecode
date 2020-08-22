@@ -27,6 +27,7 @@ class Post < ApplicationRecord
 
   def ask_to(users)
     raise ArgumentError, 'argument type must be array' unless users.is_a? Array
+    raise ActiveRecord::RecordNotSaved, 'this post not saved in the db' unless persisted?
 
     transaction do
       users.each do |user|
