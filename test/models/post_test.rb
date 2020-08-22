@@ -25,6 +25,7 @@ class PostTest < ActiveSupport::TestCase
     @post.source_url = "http://hogehoge.com/hoge"
     @post.body = 'この命名、きれい？'
     @post.code = 'puts hello'
+    @post.title = 'meimei'
     @post.bestanswer_reward = 100
   end
 

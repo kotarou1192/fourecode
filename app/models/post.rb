@@ -5,6 +5,7 @@ class Post < ApplicationRecord
   MIN_REWARD = 0
 
   before_save :set_default_reward
+  validates :title, presence: true
   validates :body, presence: true
   validates :code, presence: true
   validates :bestanswer_reward, numericality: { greater_than_or_equal_to: MIN_REWARD, less_than_or_equal_to: MAX_REWARD }, allow_nil: true

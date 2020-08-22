@@ -47,6 +47,7 @@ ActiveRecord::Schema.define(version: 2020_08_20_070623) do
   end
 
   create_table "posts", force: :cascade do |t|
+    t.string "title"
     t.integer "bestanswer_reward"
     t.string "source_url"
     t.string "state", default: "accepting"

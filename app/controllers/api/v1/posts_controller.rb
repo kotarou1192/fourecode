@@ -23,6 +23,12 @@ class Api::V1::PostsController < ApplicationController
       return render status: 400, json: generate_response(FAILED, message: message)
                                          .merge(error_messages(key: 'login', message: message))
     end
+    unless onetime_session.available?
+      message = 'onetime token is too old'
+      return render status: 400, json: generate_response(OLD_TOKEN, message: message)
+                                         .merge(error_messages(key: 'token', message: message))
+    end
+
     user = onetime_session.user
     post = user.posts.new(post_params)
     if post.save
@@ -36,7 +42,7 @@ class Api::V1::PostsController < ApplicationController
   private
 
   def post_params
-    params.require(:value).permit(:body, :code, :source_url, :bestanswer_reward)
+    params.require(:value).permit(:body, :code, :source_url, :bestanswer_reward, :title)
   end
 
   def user_token_from_nest_params
