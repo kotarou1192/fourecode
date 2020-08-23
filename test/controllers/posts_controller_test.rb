@@ -121,4 +121,33 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
 
     assert body['body']['is_mine'] == true
   end
+
+  # test to update
+
+  test 'should be updated' do
+    m, o = create_sessions
+    user_post = @user.posts.create(title: 'test', body: 'test', code: 'code', source_url: 'test')
+
+    put "/api/v1/posts/#{user_post.id}", params: { token: { onetime: o.token }, value: { body: 'body', code: 'edited', source_url: 'edited' } }
+    body = JSON.parse(response.body)
+    assert body['status'] == 'SUCCESS'
+  end
+
+  test 'should not be updated' do
+    @email2 = 'hoge2@email.com'
+    @user2 = User.new(name: 'hoge2',
+                      nickname: 'hogechan',
+                      email: @email,
+                      password: 'hogefuga')
+    @user2.save
+    @user2.activate
+
+    m, o = create_sessions
+    user_post = @user2.posts.create(title: 'test', body: 'test', code: 'code', source_url: 'test')
+
+    put "/api/v1/posts/#{user_post.id}", params: { token: { onetime: o.token }, value: { body: 'body', code: 'edited', source_url: 'edited' } }
+    body = JSON.parse(response.body)
+    assert body['status'] == 'FAILED'
+    assert body['errors'][0]['key'] == 'authority'
+  end
 end
