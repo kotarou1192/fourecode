@@ -10,6 +10,11 @@ class Api::V1::PostsController < ApplicationController
   ERROR = 'ERROR'
   OLD_TOKEN = 'OLD_TOKEN'
 
+  before_action :get_user, only: %i[create update]
+
+  def update
+  end
+
   # show the post
   def show
     # パラメーターにtokenがあり、かつ、そのトークンがセッションに存在し、期限が切れていなかったら返信パラメーターにis_mine=trueを入れる。
@@ -37,6 +42,20 @@ class Api::V1::PostsController < ApplicationController
 
   # create a post
   def create
+    return unless @user
+
+    post = @user.posts.new(post_params)
+    if post.save
+      return render json: generate_response(SUCCESS, 'post has been created successfully')
+    end
+
+    render status: 400, json: generate_response(FAILED, nil)
+                                .merge(error_messages(error_messages: generate_error_messages_from_errors(post.errors.messages)))
+  end
+
+  private
+
+  def get_user
     unless user_token_from_nest_params[:onetime]
       return render status: 400, json: generate_response(FAILED, nil)
                                          .merge(error_messages(key: 'token', message: 'onetime token is empty'))
@@ -54,17 +73,8 @@ class Api::V1::PostsController < ApplicationController
                                          .merge(error_messages(key: 'token', message: message))
     end
 
-    user = onetime_session.user
-    post = user.posts.new(post_params)
-    if post.save
-      return render json: generate_response(SUCCESS, 'post has been created successfully')
-    end
-
-    render status: 400, json: generate_response(FAILED, nil)
-                                .merge(error_messages(error_messages: generate_error_messages_from_errors(post.errors.messages)))
+    @user = onetime_session.user
   end
-
-  private
 
   def post_info(post)
     user = post.user
