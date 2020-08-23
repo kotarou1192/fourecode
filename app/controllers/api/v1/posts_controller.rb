@@ -12,7 +12,24 @@ class Api::V1::PostsController < ApplicationController
 
   before_action :get_user, only: %i[create update]
 
+  # edit the post
   def update
+    return unless @user
+
+    post = Post.find(post_id)
+
+    unless @user.id == post.user_id || @user.admin?
+      message = 'this post is not yours. if you edit this post, you should be a admin'
+      return render status: 400, json: generate_response(FAILED, message)
+                                         .merge(error_messages(key: 'authority', message: message))
+    end
+
+    if post.update(update_params)
+      return render json: generate_response(SUCCESS, 'post has been created successfully')
+    end
+
+    render status: 400, json: generate_response(FAILED, nil)
+                                .merge(error_messages(error_messages: generate_error_messages_from_errors(post.errors.messages)))
   end
 
   # show the post
@@ -107,6 +124,10 @@ class Api::V1::PostsController < ApplicationController
 
   def post_params
     params.require(:value).permit(:body, :code, :source_url, :bestanswer_reward, :title)
+  end
+
+  def update_params
+    params.require(:value).permit(:body, :code, :source_url)
   end
 
   def user_token_from_nest_params
