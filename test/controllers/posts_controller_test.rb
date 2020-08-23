@@ -150,4 +150,51 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert body['status'] == 'FAILED'
     assert body['errors'][0]['key'] == 'authority'
   end
+
+  # test to destroy
+
+  test 'should be deleted' do
+    m, o = create_sessions
+    user_post = @user.posts.create(title: 'test', body: 'test', code: 'code', source_url: 'test')
+
+    delete "/api/v1/posts/#{user_post.id}", params: { token: o.token }
+    body = JSON.parse(response.body)
+    assert body['status'] == 'SUCCESS'
+  end
+
+  test 'should not be deleted' do
+    @email2 = 'hoge2@email.com'
+    @user2 = User.new(name: 'hoge2',
+                      nickname: 'hogechan',
+                      email: @email,
+                      password: 'hogefuga')
+    @user2.save
+    @user2.activate
+
+    m, o = create_sessions
+    user_post = @user2.posts.create(title: 'test', body: 'test', code: 'code', source_url: 'test')
+
+    delete "/api/v1/posts/#{user_post.id}", params: { token: o.token }
+    body = JSON.parse(response.body)
+    assert body['status'] == 'FAILED'
+  end
+
+  test 'should be deleted by admin' do
+    @email2 = 'hoge2@email.com'
+    @user2 = User.new(name: 'hoge2',
+                      nickname: 'hogechan',
+                      email: @email,
+                      password: 'hogefuga')
+    @user2.save
+    @user2.activate
+
+    m, o = create_sessions
+    user_post = @user2.posts.create(title: 'test', body: 'test', code: 'code', source_url: 'test')
+
+    @user.update(admin: true)
+
+    delete "/api/v1/posts/#{user_post.id}", params: { token: o.token }
+    body = JSON.parse(response.body)
+    assert body['status'] == 'FAILED'
+  end
 end

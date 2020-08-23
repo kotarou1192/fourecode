@@ -11,6 +11,31 @@ class Api::V1::PostsController < ApplicationController
   OLD_TOKEN = 'OLD_TOKEN'
 
   before_action :get_user, only: %i[create update]
+  before_action :get_session_owner, only: %i[show destroy]
+
+  # destroy the post
+  def destroy
+    unless @session_user
+      message = 'you are not login'
+      return render status: 400, json: generate_response(FAILED, message: message)
+                                         .merge(error_messages(key: 'login', message: message))
+    end
+
+    post = Post.find(post_id)
+
+    unless @session_user.id == post.user_id || @session_user.admin?
+      message = 'this post is not yours. if you edit this post, you should be a admin'
+      return render status: 400, json: generate_response(FAILED, message)
+                                         .merge(error_messages(key: 'authority', message: message))
+    end
+
+    if post.destroy
+      return render json: generate_response(SUCCESS, 'post has been created successfully')
+    end
+
+    render status: 400, json: generate_response(FAILED, nil)
+                                .merge(error_messages(error_messages: generate_error_messages_from_errors(post.errors.messages)))
+  end
 
   # edit the post
   def update
@@ -25,7 +50,7 @@ class Api::V1::PostsController < ApplicationController
     end
 
     if post.update(update_params)
-      return render json: generate_response(SUCCESS, 'post has been created successfully')
+      return render json: generate_response(SUCCESS, 'the post is updated successfully')
     end
 
     render status: 400, json: generate_response(FAILED, nil)
@@ -34,19 +59,6 @@ class Api::V1::PostsController < ApplicationController
 
   # show the post
   def show
-    # パラメーターにtokenがあり、かつ、そのトークンがセッションに存在し、期限が切れていなかったら返信パラメーターにis_mine=trueを入れる。
-    # トークンの期限が切れていれば400エラーを発生させる
-    if user_token_from_flat_params
-      onetime_session = login?(user_token_from_flat_params)
-      if onetime_session&.available?
-        @session_user = onetime_session.user
-      elsif onetime_session && !onetime_session.available?
-        message = 'onetime token is unavailable'
-        return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                           .merge(error_messages(key: 'token', message: message))
-      end
-    end
-
     selected_post = Post.find(post_id)
     unless selected_post
       message = 'not found'
@@ -71,6 +83,21 @@ class Api::V1::PostsController < ApplicationController
   end
 
   private
+
+  def get_session_owner
+    # パラメーターにtokenがあり、かつ、そのトークンがセッションに存在し、期限が切れていなかったら返信パラメーターにis_mine=trueを入れる。
+    # トークンの期限が切れていれば400エラーを発生させる
+    return unless user_token_from_flat_params
+
+    onetime_session = login?(user_token_from_flat_params)
+    if onetime_session&.available?
+      @session_user = onetime_session.user
+    elsif onetime_session && !onetime_session.available?
+      message = 'onetime token is unavailable'
+      render status: 400, json: generate_response(OLD_TOKEN, message: message)
+                                  .merge(error_messages(key: 'token', message: message))
+    end
+  end
 
   def get_user
     unless user_token_from_nest_params[:onetime]
