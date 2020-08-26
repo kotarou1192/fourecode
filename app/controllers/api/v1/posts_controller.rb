@@ -126,6 +126,7 @@ class Api::V1::PostsController < ApplicationController
       title: post.title,
       body: post.body,
       code: post.code,
+      state: post.state,
       bestanswer_reward: post.bestanswer_reward,
       source_url: post.source_url,
       is_mine: @session_user ? user.id == @session_user.id : false,
