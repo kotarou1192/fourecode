@@ -33,8 +33,9 @@ class Api::V1::PostsController < ApplicationController
       return render json: generate_response(SUCCESS, 'post has been created successfully')
     end
 
+    error_messages = generate_error_messages_from_errors(post.errors.messages)
     render status: 400, json: generate_response(FAILED, nil)
-                                .merge(error_messages(error_messages: generate_error_messages_from_errors(post.errors.messages)))
+                                .merge(error_messages(error_messages: error_messages))
   end
 
   # edit the post
@@ -53,8 +54,9 @@ class Api::V1::PostsController < ApplicationController
       return render json: generate_response(SUCCESS, 'the post is updated successfully')
     end
 
+    error_messages = generate_error_messages_from_errors(post.errors.messages)
     render status: 400, json: generate_response(FAILED, nil)
-                                .merge(error_messages(error_messages: generate_error_messages_from_errors(post.errors.messages)))
+                                .merge(error_messages(error_messages: error_messages))
   end
 
   # show the post
@@ -78,8 +80,9 @@ class Api::V1::PostsController < ApplicationController
       return render json: generate_response(SUCCESS, 'post has been created successfully')
     end
 
+    error_messages = generate_error_messages_from_errors(post.errors.messages)
     render status: 400, json: generate_response(FAILED, nil)
-                                .merge(error_messages(error_messages: generate_error_messages_from_errors(post.errors.messages)))
+                                .merge(error_messages(error_messages: error_messages))
   end
 
   private
