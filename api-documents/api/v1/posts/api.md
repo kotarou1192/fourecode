@@ -13,51 +13,129 @@ TOKENが古い場合はOLD＿TOKENが帰ってくるので、masterを使って�
 SUCCESS以外の場合、基本的にbody内のmessageプロパティの値にエラーメッセージが入って帰ってくる。
 パスワードが短すぎる場合などのバリデーションエラー時は、ネストされたjsonがmessageの中に入っているので、エラーメッセージをそのまま利用する場合は注意してください。
 
-### GET  
-例: /api/v1/posts/1
+#### POST /api/v1/posts
 
-送信時のパラメータ
-```json
+送信時のjsonのかたち
+
+```
 {
-  "token": "からの場合や、そんざいしないトークンの場合は他人の投稿として表示される"
+   token: { 
+        onetime: トークンをここに
+   },
+ value: {
+        title: title100文字まで, 
+        body: body1万文字まで,
+        code: code1万文字まで,
+        source_url: source_url無くても可, 
+        bestanswer_reward: reward 無くても可能、最大で500　デフォルトは100
+    } 
 }
 ```
-成功時のレスポンス
-```json
+
+#### GET /api/v1/posts/id
+
+id（数字、1から始まるオートインクリメント）の番号のPOSTを取得します。
+
+送信時パラメーターにTokenがあると、自分の投稿かどうかを判断して返します。
+
+```
 {
-  "status": "SUCCESS",
-  "body": {
-    "title": "タイトル",
-    "body": "本文",
-    "code": "コード片",
-    "bestanswer_reward": "ベストアンサーへのお布施",
-    "source_url": "githubとかのURL（ない場合もある）",
-    "is_mine": "自分の投稿の場合はtrue",
-    "posted_by": {
-      "name": "一意な名前（ほぼID)",
-      "nickname": "ニックネーム",
-      "icon": "アイコンのURL"
+  token: onetime_token here
+}
+```
+
+帰ってくるjsonの例
+
+```
+{
+    "status": "SUCCESS",
+    "body": {
+        "title": "test",
+        "body": "hello",
+        "code": "puts 'hello'     hello_world = 'here'",
+        "bestanswer_reward": 100,
+        "source_url": "",
+        "is_mine": false, //自分の投稿かどうか
+        "posted_by": {
+            "name": "takashiii",
+            "nickname": "takashiii",
+            "icon": "/uploads/user/icon/8e971bee-c5aa-4007-b1e4-1bb8efb985e4/20200816232527.png"
+        }
     }
-  }
 }
 ```
 
-### POST
+#### PUT /api/v1/posts/id
 
-送信時のJSON  
-source_urlとbestanswer_rewardはパラメーター自体無くても可能  
+idのポストを編集します。
 
-```json
+リクエストのjsonの例
+
+```
 {
-  "token": {
-    "onetime": "onetime token here"
-  },
-  "value": {
-    "title": "タイトルを入力100文字以内",
-    "body": "本文(空・空文字でなければいい)1万文字以内",
-    "code": "コード片(空・空文字でなければいい)1万文字以内",
-    "source_url": "GithubなどのURL（空も可能）",
-    "bestanswer_reward": "ベストアンサーに上げるコイン（空なら100に）"
-  }
+    "value": {
+        "code": "編集後のコードをここに",
+        "body": "編集後の本文",
+        "source_url": "編集後のソースURLをここに"
+    },
+    "token":  {
+        "onetime": "ここにトークンを"
+    }
+}
+```
+
+#### DELETE /api/v1/posts/id
+
+idのポストを削除します。  
+リクエスト時は以下のパラメーターを送信してください。
+```
+{
+  token: onetime_token here
+}
+```
+
+#### GET /api/v1/search/posts
+
+キーワードは空白区切りで10個まで。11個以上を送るとエラーが帰ってきます。
+
+ページは空配列が帰ってくるまで無限にめくれます。  
+statusの文字列が正しくない場合は無視されます。  
+```
+{
+    "keyword": "test code hoge", //キーワードを空白区切りで
+    "page_number": 1, // ページの指定
+    "max_content": 50, // 1ページに表示する量
+    "status": "accepting voting resolvedのどれか、もしくは空で指定なし"
+}
+```
+
+以上のレスポンス
+
+```
+{
+    "status": "SUCCESS",
+    "body": {
+        "results": [
+            {
+                "id": 120082,
+                "title": "test puts hoge",
+                "body": "test",
+                "code": "code",
+                "status": "voting",
+                "reward": 100
+            },
+                // 割愛
+            {
+                "id": 120033,
+                "title": "test99953",
+                "body": "test99953",
+                "code": "code99953",
+                "status": "accepting",
+                "reward": 100
+            }
+        ],
+        "results_size": 50,
+        "page_number": 1
+    }
 }
 ```
