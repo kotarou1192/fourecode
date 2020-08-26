@@ -3,9 +3,9 @@
 class User < ApplicationRecord
   attr_accessor :activation_token, :password
   before_save :downcase_email
-  before_create :create_activation_digest, :generate_uuid, :create_password_digest
+  before_create :create_activation_digest, :generate_uuid, :create_password_digest, :set_default_nickname
 
-  validates :nickname, presence: true, length: { maximum: 30 }
+  validates :nickname, presence: true, length: { maximum: 30 }, if: :nickname_exists?, allow_nil: true
   validates :name, uniqueness: true, presence: true, length: { maximum: 30 }
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i.freeze
   validates :email, presence: true, length: { maximum: 255 },
@@ -69,6 +69,16 @@ class User < ApplicationRecord
   end
 
   private
+
+  def nickname_exists?
+    nickname != ''
+  end
+
+  def set_default_nickname
+    return if self.nickname
+
+    self.nickname = name
+  end
 
   # メールアドレスをすべて小文字にする
   def downcase_email
