@@ -2,7 +2,7 @@
 
 class Api::V1::PasswordResetsController < ApplicationController
   include ErrorMessageHelper
-  
+
   SUCCESS = 'SUCCESS'
   FAILED = 'FAILED'
   ERROR = 'ERROR'
@@ -21,19 +21,19 @@ class Api::V1::PasswordResetsController < ApplicationController
     unless session
       message = 'invalid reset link'
       return render status: 400, json: generate_response(FAILED, message: message)
-             .merge(error_messages(key: 'invalid_link', message: message))
+                                         .merge(error_messages(key: 'invalid_link', message: message))
     end
 
     unless session.available?
       message = 'the link is too old'
       return render status: 400, json: generate_response(FAILED, message: message)
-             .merge(error_messages(key: 'old_link', message: message))
+                                         .merge(error_messages(key: 'old_link', message: message))
     end
 
     unless user_params[:password]
       message = 'password does not exit'
       return render status: 400, json: generate_response(FAILED, message: message)
-             .merge(error_messages(key: 'password', message: message))
+                                         .merge(error_messages(key: 'password', message: message))
     end
 
     user = session.user
@@ -44,8 +44,9 @@ class Api::V1::PasswordResetsController < ApplicationController
       return render json: generate_response(SUCCESS, message: 'your password has been changed')
     end
 
+    error_messages = generate_error_messages_from_errors(user.errors.messages)
     render status: 400, json: generate_response(FAILED, nil)
-      .merge(error_messages(error_messages: generate_error_messages_from_errors(user.errors.messages)))
+                                .merge(error_messages(error_messages: error_messages))
   end
 
   # POSTで呼び出す
@@ -60,12 +61,12 @@ class Api::V1::PasswordResetsController < ApplicationController
     unless user
       message = 'the email address does not exist'
       return render status: 400, json: generate_response(FAILED, message: message)
-             .merge(error_messages(key: 'email', message: message))
+                                         .merge(error_messages(key: 'email', message: message))
     end
     unless user.activated?
       message = 'account is not activated'
       return render status: 400, json: generate_response(FAILED, message: message)
-             .merge(error_messages(key: 'account', message: message))
+                                         .merge(error_messages(key: 'account', message: message))
     end
 
     user.send_password_reset_email

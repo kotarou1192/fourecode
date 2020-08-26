@@ -16,6 +16,8 @@ class User < ApplicationRecord
 
   has_many :master_session, dependent: :destroy
   has_many :onetime_session, dependent: :destroy
+  has_many :posts, dependent: :destroy
+  has_many :asked_users, dependent: :destroy
   has_one :password_reset_session, dependent: :destroy
 
   mount_uploader :icon, ImageUploader

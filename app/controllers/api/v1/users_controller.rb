@@ -14,16 +14,18 @@ module Api
       def create
         @user = User.new(user_params)
         unless @user.valid?
+          error_messages = generate_error_messages_from_errors(@user.errors.messages)
           return render status: 400, json: generate_response(FAILED, nil)
-                                             .merge(error_messages(error_messages: generate_error_messages_from_errors(@user.errors.messages)))
+                                             .merge(error_messages(error_messages: error_messages))
         end
 
         if @user.save
           @user.send_activation_email
           render json: generate_response(SUCCESS, message: 'activation mail has been sent')
         else
+          error_messages = generate_error_messages_from_errors(@user.errors.messages)
           render status: 400, json: generate_response(ERROR, nil)
-                                      .merge(error_messages(error_messages: generate_error_messages_from_errors(@user.errors.messages)))
+                                      .merge(error_messages(error_messages: error_messages))
         end
       end
 
@@ -99,8 +101,9 @@ module Api
         if update_selected_user(selected_user)
           render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
         else
+          error_messages = generate_error_messages_from_errors(selected_user.errors.messages)
           render status: 400, json: generate_response(FAILED, nil)
-                                      .merge(error_messages(error_messages: generate_error_messages_from_errors(selected_user.errors.messages)))
+                                      .merge(error_messages(error_messages: error_messages))
         end
       end
 
@@ -141,8 +144,9 @@ module Api
         if selected_user.destroy
           render json: generate_response(SUCCESS, message: 'user is deleted successfully')
         else
+          error_messages = generate_error_messages_from_errors(selected_user.errors.messages)
           render status: 400, json: generate_response(FAILED, message: selected_user.errors.messages)
-                                      .merge(error_messages(error_messages: generate_error_messages_from_errors(selected_user.errors.messages)))
+                                      .merge(error_messages(error_messages: error_messages))
         end
       end
 

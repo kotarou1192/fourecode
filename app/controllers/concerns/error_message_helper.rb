@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 module ErrorMessageHelper
   extend ActiveSupport::Concern
+
   def generate_error_messages_from_errors(messages)
     messages.map do |key, value|
       {

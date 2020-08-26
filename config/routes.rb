@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   namespace 'api' do
     namespace 'v1' do
       resources :users, only: %i[show create destroy update]
+      resources :posts, only: %i[show create destroy update]
       put '/account_activations', to: 'account_activations#update'
       post '/auth', to: 'auth#create'
       delete '/auth', to: 'auth#destroy'
@@ -12,6 +13,7 @@ Rails.application.routes.draw do
       get '/auth', to: 'auth#index'
       post '/password_resets', to: 'password_resets#create'
       put '/password_resets', to: 'password_resets#update'
+      get '/search/posts', to: 'search#search_posts'
     end
   end
 end
