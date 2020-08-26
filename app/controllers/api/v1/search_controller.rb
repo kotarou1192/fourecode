@@ -12,13 +12,13 @@ class Api::V1::SearchController < ApplicationController
   SEARCH_RESULTS_COUNT = 30
   SEARCH_STRING_OFFSET = 30
   POST_STATUS = %w[accepting voting resolved].freeze
-  MAX_KEYWORD_SIZE = 10
+  MAX_KEYWORDS_COUNT = 10
 
   # postsを検索する
   def search_posts
     # 空白区切りで入力された文字列を部分一致の記法を含んだ配列に変換する
     keywords = get_search_keyword.split(/[[:blank:]]/).map { |key| "%#{key}%" }
-    if keywords.size > MAX_KEYWORD_SIZE
+    if keywords.size > MAX_KEYWORDS_COUNT
       return render status: 400, json: generate_response(ERROR, message: 'too many keywords')
                                          .merge(error_messages(key: 'keyword', message: 'too many keywords'))
     end
