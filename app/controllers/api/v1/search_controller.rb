@@ -4,14 +4,11 @@ class Api::V1::SearchController < ApplicationController
   include ErrorMessageHelper
   include ResponseHelper
   include LoginHelper
+  include ResponseStatusHelper
 
-  SUCCESS = 'SUCCESS'
-  FAILED = 'FAILED'
-  ERROR = 'ERROR'
-  OLD_TOKEN = 'OLD_TOKEN'
   SEARCH_RESULTS_COUNT = 30
   SEARCH_STRING_OFFSET = 30
-  POST_STATUS = %w[accepting voting resolved].freeze
+  POST_STATUS = Post::DEFINED_STATES
   MAX_KEYWORDS_COUNT = 10
 
   # postsを検索する

@@ -5,11 +5,7 @@ module Api
     class UsersController < ApplicationController
       include LoginHelper
       include ErrorMessageHelper
-
-      SUCCESS = 'SUCCESS'
-      FAILED = 'FAILED'
-      ERROR = 'ERROR'
-      OLD_TOKEN = 'OLD_TOKEN'
+      include ResponseStatusHelper
 
       def create
         @user = User.new(user_params)
