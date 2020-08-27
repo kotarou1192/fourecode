@@ -14,6 +14,7 @@ Rails.application.routes.draw do
       post '/password_resets', to: 'password_resets#create'
       put '/password_resets', to: 'password_resets#update'
       get '/search/posts', to: 'search#search_posts'
+      get '/search/users', to: 'search#search_users'
     end
   end
 end
