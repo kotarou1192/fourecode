@@ -76,7 +76,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     master, onetime = create_sessions
     get '/api/v1/users/hoge', params: { token: onetime.token }
     body = JSON.parse(response.body)
-    assert response.status == 200 && body['body'].is_a?(Array)
+    assert response.status == 200
   end
 
   # update user test
