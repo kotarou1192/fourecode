@@ -18,4 +18,8 @@ module ErrorMessageHelper
     errors.push(key: key, messages: [message], code: code) if key
     { errors: errors }
   end
+
+  def error_response(status: 400, json:)
+    render status: status, json: json
+  end
 end
