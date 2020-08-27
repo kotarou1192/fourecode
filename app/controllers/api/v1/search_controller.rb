@@ -13,17 +13,55 @@ class Api::V1::SearchController < ApplicationController
 
   # postsを検索する
   def search_posts
-    # 空白区切りで入力された文字列を部分一致の記法を含んだ配列に変換する
-    keywords = get_search_keyword.split(/[[:blank:]]/).map { |key| "%#{key}%" }
-    if keywords.size > MAX_KEYWORDS_COUNT
-      return render status: 400, json: generate_response(ERROR, message: 'too many keywords')
-                                         .merge(error_messages(key: 'keyword', message: 'too many keywords'))
-    end
+    return if too_many_keywords?
 
-    posts_array = find_posts(keywords, turn_pages)
+    posts_array = find_posts(@keywords, turn_pages)
 
-    results = generate_results(posts_array, keywords)
+    results = generate_results(posts_array, @keywords)
 
+    render_results(results)
+  end
+
+  # usersを検索する
+  def search_users
+    return if too_many_keywords?
+
+    users = find_users(@keywords, turn_pages)
+
+    results = generate_user_results(users)
+
+    render_results(results)
+  end
+
+  private
+
+  def keywords_results_from_users(keywords, index = 0)
+    keyword = keywords[index]
+    user = User.arel_table
+    users = user.project('*').from('users')
+              .where(user[:name].matches(keyword))
+
+    return users if keywords.size - 1 <= index
+
+    Arel::Nodes::UnionAll.new(users, keywords_results_from_users(keywords, index + 1))
+  end
+
+  def find_users(keywords, page)
+    User.find_by_sql(User.arel_table
+                       .project('result.name', 'result.nickname',
+                                'result.explanation', 'result.icon',
+                                'result.admin', 'result.activated')
+                       .from(keywords_results_from_users(keywords).as('result'))
+                       .group('result.name', 'result.nickname',
+                              'result.explanation', 'result.icon',
+                              'result.admin', 'result.activated')
+                       .order('count(*) desc') # ここに評価値みたいなのを入れるといいかもしれない
+                       .take(max_content)
+                       .skip(max_content * (page - 1))
+                       .to_sql)
+  end
+
+  def render_results(results)
     body = {
       results: results,
       results_size: results.size,
@@ -32,7 +70,32 @@ class Api::V1::SearchController < ApplicationController
     render json: generate_response(SUCCESS, body)
   end
 
-  private
+  def generate_user_results(users)
+    users.map do |selected_user|
+      {
+        name: selected_user.name,
+        nickname: selected_user.nickname,
+        explanation: selected_user.explanation,
+        icon: selected_user.icon.url,
+        is_admin: selected_user.admin?
+      }
+    end
+  end
+
+  def get_keywords
+    @keywords = get_search_keyword.split(/[[:blank:]]/).map { |key| "%#{key}%" }
+  end
+
+  def too_many_keywords?
+    get_keywords
+    if @keywords.size > MAX_KEYWORDS_COUNT
+      render status: 400, json: generate_response(ERROR, message: 'too many keywords')
+                                  .merge(error_messages(key: 'keyword', message: 'too many keywords'))
+      return true
+    end
+
+    false
+  end
 
   # keyword_A UNION ALL keyword_B UNION ALL keyword_C UNION ALL .......
   def join_keywords_results(keywords, index = 0)

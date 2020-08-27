@@ -37,7 +37,7 @@ module Api
           end
         end
 
-        selected_users = User.where(['name LIKE ?', "#{user_name}%"]).limit(100)
+        selected_user = User.find_by(name: user_name)
         if user_name.nil?
           message = 'invalid user name'
           return error_response json: generate_response(FAILED, message: message)
@@ -141,6 +141,17 @@ module Api
       end
 
       private
+
+      def user_info(selected_user)
+        {
+          name: selected_user.name,
+          nickname: selected_user.nickname,
+          explanation: selected_user.explanation,
+          icon: selected_user.icon,
+          is_admin: selected_user.admin?,
+          is_mypage: @session_user == selected_user
+        }
+      end
 
       def update_selected_user(user)
         user.transaction do
