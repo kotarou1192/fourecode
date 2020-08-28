@@ -19,7 +19,7 @@ module Api
           return render status: 400, json: generate_response(FAILED, nil)
         end
 
-        if user&.authenticated?(:password, user_params[:password])
+        if user.authenticated?(:password, user_params[:password])
           generate_access_token(user)
           return render json: generate_response(SUCCESS, token: { master: @master_session.token, onetime: @onetime_session.token })
         end
