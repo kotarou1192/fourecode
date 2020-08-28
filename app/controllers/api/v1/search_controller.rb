@@ -15,7 +15,7 @@ class Api::V1::SearchController < ApplicationController
   def search_posts
     return if too_many_keywords?
 
-    posts_array = find_posts(@keywords, turn_pages)
+    posts_array = Post.find_posts(@keywords, post_status, turn_pages, max_content)
 
     results = generate_results(posts_array, @keywords)
 
@@ -26,7 +26,7 @@ class Api::V1::SearchController < ApplicationController
   def search_users
     return if too_many_keywords?
 
-    users = find_users(@keywords, turn_pages)
+    users = User.find_users(@keywords, turn_pages, max_content)
 
     results = generate_user_results(users)
 
@@ -34,32 +34,6 @@ class Api::V1::SearchController < ApplicationController
   end
 
   private
-
-  def keywords_results_from_users(keywords, index = 0)
-    keyword = keywords[index]
-    user = User.arel_table
-    users = user.project('*').from('users')
-              .where(user[:name].matches(keyword))
-
-    return users if keywords.size - 1 <= index
-
-    Arel::Nodes::UnionAll.new(users, keywords_results_from_users(keywords, index + 1))
-  end
-
-  def find_users(keywords, page)
-    User.find_by_sql(User.arel_table
-                       .project('result.name', 'result.nickname',
-                                'result.explanation', 'result.icon',
-                                'result.admin', 'result.activated')
-                       .from(keywords_results_from_users(keywords).as('result'))
-                       .group('result.name', 'result.nickname',
-                              'result.explanation', 'result.icon',
-                              'result.admin', 'result.activated')
-                       .order('count(*) desc') # ここに評価値みたいなのを入れるといいかもしれない
-                       .take(max_content)
-                       .skip(max_content * (page - 1))
-                       .to_sql)
-  end
 
   def render_results(results)
     body = {
@@ -95,40 +69,6 @@ class Api::V1::SearchController < ApplicationController
     end
 
     false
-  end
-
-  # keyword_A UNION ALL keyword_B UNION ALL keyword_C UNION ALL .......
-  def join_keywords_results(keywords, index = 0)
-    keyword = keywords[index]
-    post = Post.arel_table
-    po = post.project('*').from('posts')
-           .where(post[:title].matches(keyword)
-                    .or(post[:code].matches(keyword))
-                    .or(post[:body].matches(keyword)))
-
-    return po if keywords.size - 1 <= index
-
-    Arel::Nodes::UnionAll.new(po, join_keywords_results(keywords, index + 1))
-  end
-
-  def state
-    (Arel::Table.new :result)[:state].matches(post_status)
-  end
-
-  def find_posts(keywords, page)
-    Post.find_by_sql(Post.arel_table
-                       .project('result.id', 'result.title',
-                                'result.body', 'result.code',
-                                'result.state', 'result.bestanswer_reward')
-                       .from(join_keywords_results(keywords).as('result'))
-                       .where(state)
-                       .group('result.id', 'result.title',
-                              'result.body', 'result.code',
-                              'result.state', 'result.bestanswer_reward')
-                       .order('count(*) desc, result.id desc') # ここに評価値みたいなのを入れるといいかもしれない
-                       .take(max_content)
-                       .skip(max_content * (page - 1))
-                       .to_sql)
   end
 
   # レスポンスに入れる投稿のダイジェストの配列を生成する
