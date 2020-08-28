@@ -68,7 +68,38 @@ class User < ApplicationRecord
     self.password_digest = User.digest(password)
   end
 
+  def self.find_users(keywords, page, max_content)
+    User.find_by_sql(User.arel_table
+                       .project('result.name', 'result.nickname',
+                                'result.explanation', 'result.icon',
+                                'result.admin', 'result.activated')
+                       .from(keywords_results_from_users(keywords).as('result'))
+                       .where(set_user_state(true))
+                       .group('result.name', 'result.nickname',
+                              'result.explanation', 'result.icon',
+                              'result.admin', 'result.activated')
+                       .order('count(*) desc') # ここに評価値みたいなのを入れるといいかもしれない
+                       .take(max_content)
+                       .skip(max_content * (page - 1))
+                       .to_sql)
+  end
+
   private
+
+  def self.keywords_results_from_users(keywords, index = 0)
+    keyword = keywords[index]
+    user = User.arel_table
+    users = user.project('*').from('users')
+              .where(user[:name].matches(keyword))
+
+    return users if keywords.size - 1 <= index
+
+    Arel::Nodes::UnionAll.new(users, keywords_results_from_users(keywords, index + 1))
+  end
+
+  def self.set_user_state(is_activated)
+    (Arel::Table.new :result)[:activated].eq(is_activated)
+  end
 
   def nickname_exists?
     nickname != ''
