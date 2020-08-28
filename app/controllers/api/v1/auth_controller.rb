@@ -49,7 +49,7 @@ module Api
                                              .merge(error_messages(key: 'token', message: message))
         end
 
-        destroy_old_sessions(user)
+        MasterSession.destroy_old_sessions(user)
         body = {
           name: user.name,
           nickname: user.nickname,
@@ -83,7 +83,7 @@ module Api
                                              .merge(error_messages(key: 'token', message: message))
         end
 
-        destroy_old_sessions(user)
+        MasterSession.destroy_old_sessions(user)
         onetime_session = master_session.onetime_session.new
         onetime_session.user = user
         onetime_session.save!
@@ -113,26 +113,11 @@ module Api
         end
 
         user = User.find_by(id: onetime_session.user_id)
-        destroy_sessions(user)
+        MasterSession.destroy_sessions(user)
         render json: generate_response(SUCCESS, message: 'logout successful')
       end
 
       private
-
-      def destroy_old_sessions(user)
-        master_sessions = MasterSession.where(user_id: user.id)
-        ActiveRecord::Base.transaction do
-          master_sessions.each do |master_session|
-            master_session.destroy! unless master_session.available?
-          end
-        end
-        onetime_sessions = OnetimeSession.where(user_id: user.id)
-        ActiveRecord::Base.transaction do
-          onetime_sessions.each do |session|
-            session.destroy! unless session.available?
-          end
-        end
-      end
 
       def generate_access_token(user)
         ActiveRecord::Base.transaction do
@@ -140,13 +125,6 @@ module Api
           @onetime_session = @master_session.onetime_session.new
           @onetime_session.user = user
           @onetime_session.save!
-        end
-      end
-
-      def destroy_sessions(user)
-        master_sessions = MasterSession.where(user_id: user.id)
-        ActiveRecord::Base.transaction do
-          master_sessions.each(&:destroy!)
         end
       end
 
