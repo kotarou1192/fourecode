@@ -46,7 +46,41 @@ class Post < ApplicationRecord
     end
   end
 
+  def self.find_posts(keywords, post_state, page, max_content)
+    Post.find_by_sql(Post.arel_table
+                       .project('result.id', 'result.title',
+                                'result.body', 'result.code',
+                                'result.state', 'result.bestanswer_reward')
+                       .from(join_keywords_results(keywords).as('result'))
+                       .where(set_post_state(post_state))
+                       .group('result.id', 'result.title',
+                              'result.body', 'result.code',
+                              'result.state', 'result.bestanswer_reward')
+                       .order('count(*) desc, result.id desc') # ここに評価値みたいなのを入れるといいかもしれない
+                       .take(max_content)
+                       .skip(max_content * (page - 1))
+                       .to_sql)
+  end
+
   private
+
+  # keyword_A UNION ALL keyword_B UNION ALL keyword_C UNION ALL .......
+  def self.join_keywords_results(keywords, index = 0)
+    keyword = keywords[index]
+    post = Post.arel_table
+    po = post.project('*').from('posts')
+           .where(post[:title].matches(keyword)
+                    .or(post[:code].matches(keyword))
+                    .or(post[:body].matches(keyword)))
+
+    return po if keywords.size - 1 <= index
+
+    Arel::Nodes::UnionAll.new(po, join_keywords_results(keywords, index + 1))
+  end
+
+  def self.set_post_state(post_status)
+    (Arel::Table.new :result)[:state].matches(post_status)
+  end
 
   def set_default_reward
     self.bestanswer_reward ||= DEFAULT_REWARD
