@@ -5,8 +5,9 @@ class User < ApplicationRecord
   before_save :downcase_email
   before_create :create_activation_digest, :generate_uuid, :create_password_digest, :set_default_nickname
 
-  validates :nickname, presence: true, length: { maximum: 30 }, if: :nickname_exists?, allow_nil: true
-  validates :name, uniqueness: true, presence: true, length: { maximum: 30 }
+  VALID_NAME_REGEX = /\A[a-zA-Z0-9-]+\z/
+  validates :nickname, format: { with: VALID_NAME_REGEX }, presence: true, length: { maximum: 30 }, if: :nickname_exists?, allow_nil: true
+  validates :name, format: { with: VALID_NAME_REGEX }, uniqueness: true, presence: true, length: { maximum: 30 }
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i.freeze
   validates :email, presence: true, length: { maximum: 255 },
             format: { with: VALID_EMAIL_REGEX },

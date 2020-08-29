@@ -33,8 +33,20 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   # create user test
 
+  test 'invalid name should be rejected' do
+    user_name = 'hogefuga?pow!'
+    user_email = 'hogefuga@hoge.com'
+    post '/api/v1/users', params: { value: { name: user_name, nickname: 'hogefuga', email: user_email, password: 'hogefuga' } }
+    user = User.find_by(email: user_email)
+    assert_not user
+    body = JSON.parse(response.body)
+    body['errors'].each do |error|
+      assert error['key'] == 'name'
+    end
+  end
+
   test 'user should create' do
-    user_name = 'hogefuga'
+    user_name = 'hoge-fuga001'
     user_email = 'hogefuga@hoge.com'
     post '/api/v1/users', params: { value: { name: user_name, nickname: 'hogefuga', email: user_email, password: 'hogefuga' } }
     user = User.find_by(email: user_email)
