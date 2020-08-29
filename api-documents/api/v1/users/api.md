@@ -31,20 +31,27 @@ user作成。
 を含めること
 
 #### GET /users/hoge
-hogeという名前で前方一致検索。
+hogeという名前のUser表示。
 返ってくるJsonは以下の通り。
 
 ```json
-[{
-  "name": "一意な名前（ほぼID)",
-  "nickname": "ニックネーム",
-  "explanation": "自己紹介",
-  "icon": "アイコンのURL",
-  "is_admin": "その人が管理者かどうか",
-  "is_mypage": "自分のページかどうか",
-}]
+{
+    "status": "SUCCESS",
+    "body": {
+        "name": "takashiii",
+        "nickname": "takashiii",
+        "explanation": null,
+        "icon": {
+            "url": "/uploads/user/icon/8e971bee-c5aa-4007-b1e4-1bb8efb985e4/20200816232527.png",
+            "thumb": {
+                "url": "/uploads/user/icon/8e971bee-c5aa-4007-b1e4-1bb8efb985e4/thumb_20200816232527.png"
+            }
+        },
+        "is_admin": false,
+        "is_mypage": false
+    }
+}
 ```
-配列である点に注意。
 
 パラメーターに
 

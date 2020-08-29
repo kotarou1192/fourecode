@@ -2,11 +2,7 @@
 
 class Api::V1::PasswordResetsController < ApplicationController
   include ErrorMessageHelper
-
-  SUCCESS = 'SUCCESS'
-  FAILED = 'FAILED'
-  ERROR = 'ERROR'
-  OLD_TOKEN = 'OLD_TOKEN'
+  include ResponseStatus
 
   # PUTで呼び出す
   # パラメーターの内容

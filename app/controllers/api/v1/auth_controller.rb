@@ -4,11 +4,8 @@ module Api
   module V1
     class AuthController < ApplicationController
       include ErrorMessageHelper
+      include ResponseStatus
 
-      SUCCESS = 'SUCCESS'
-      FAILED = 'FAILED'
-      ERROR = 'ERROR'
-      OLD_TOKEN = 'OLD_TOKEN'
       # log-in
       def create
         return update if user_tokens[:master]
@@ -22,7 +19,7 @@ module Api
           return render status: 400, json: generate_response(FAILED, nil)
         end
 
-        if user&.authenticated?(:password, user_params[:password])
+        if user.authenticated?(:password, user_params[:password])
           generate_access_token(user)
           return render json: generate_response(SUCCESS, token: { master: @master_session.token, onetime: @onetime_session.token })
         end
@@ -34,14 +31,14 @@ module Api
         if user_token_from_get_params.nil?
           message = 'property onetime of token is empty'
           return render status: 400, json: generate_response(FAILED, message: message)
-                 .merge(error_messages(key: 'token', message: message))
+                                             .merge(error_messages(key: 'token', message: message))
         end
 
         onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
         unless onetime_session
           message = 'you are not logged in'
           return render status: 400, json: generate_response(FAILED, message: message)
-                 .merge(error_messages(key: 'login', message: message))
+                                             .merge(error_messages(key: 'login', message: message))
         end
 
         user = User.find_by(id: onetime_session.user_id)
@@ -49,10 +46,10 @@ module Api
           onetime_session.destroy!
           message = 'onetime token is too old'
           return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                 .merge(error_messages(key: 'token', message: message))
+                                             .merge(error_messages(key: 'token', message: message))
         end
 
-        destroy_old_sessions(user)
+        MasterSession.destroy_old_sessions(user)
         body = {
           name: user.name,
           nickname: user.nickname,
@@ -68,14 +65,14 @@ module Api
         if user_tokens[:master].nil?
           message = 'property master of token is empty'
           return render status: 400, json: generate_response(FAILED, message: message)
-                 .merge(error_messages(key: 'token', message: message))
+                                             .merge(error_messages(key: 'token', message: message))
         end
 
         master_session = MasterSession.find_by(token_digest: MasterSession.digest(user_tokens[:master]))
         unless master_session
           message = 'you are not logged in'
           return render status: 400, json: generate_response(FAILED, message: message)
-                 .merge(error_messages(key: 'login', message: message))
+                                             .merge(error_messages(key: 'login', message: message))
         end
 
         user = User.find_by(id: master_session.user_id)
@@ -83,10 +80,10 @@ module Api
           master_session.destroy!
           message = 'master token is too old'
           return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                 .merge(error_messages(key: 'token', message: message))
+                                             .merge(error_messages(key: 'token', message: message))
         end
 
-        destroy_old_sessions(user)
+        MasterSession.destroy_old_sessions(user)
         onetime_session = master_session.onetime_session.new
         onetime_session.user = user
         onetime_session.save!
@@ -98,44 +95,29 @@ module Api
         if user_token_from_get_params.nil?
           message = 'you are not logged in'
           return render status: 400, json: generate_response(FAILED, message: message)
-                 .merge(error_messages(key: 'login', message: message))
+                                             .merge(error_messages(key: 'login', message: message))
         end
 
         onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
         unless onetime_session
           message = 'you are not logged in'
           return render status: 400, json: generate_response(FAILED, message: message)
-                 .merge(error_messages(key: 'login', message: message))
+                                             .merge(error_messages(key: 'login', message: message))
         end
 
         unless onetime_session.available?
           onetime_session.destroy!
           message = 'onetime token is too old'
           return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                 .merge(error_messages(key: 'token', message: message))
+                                             .merge(error_messages(key: 'token', message: message))
         end
 
         user = User.find_by(id: onetime_session.user_id)
-        destroy_sessions(user)
+        MasterSession.destroy_sessions(user)
         render json: generate_response(SUCCESS, message: 'logout successful')
       end
 
       private
-
-      def destroy_old_sessions(user)
-        master_sessions = MasterSession.where(user_id: user.id)
-        ActiveRecord::Base.transaction do
-          master_sessions.each do |master_session|
-            master_session.destroy! unless master_session.available?
-          end
-        end
-        onetime_sessions = OnetimeSession.where(user_id: user.id)
-        ActiveRecord::Base.transaction do
-          onetime_sessions.each do |session|
-            session.destroy! unless session.available?
-          end
-        end
-      end
 
       def generate_access_token(user)
         ActiveRecord::Base.transaction do
@@ -143,13 +125,6 @@ module Api
           @onetime_session = @master_session.onetime_session.new
           @onetime_session.user = user
           @onetime_session.save!
-        end
-      end
-
-      def destroy_sessions(user)
-        master_sessions = MasterSession.where(user_id: user.id)
-        ActiveRecord::Base.transaction do
-          master_sessions.each(&:destroy!)
         end
       end
 

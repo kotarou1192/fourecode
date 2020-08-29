@@ -22,6 +22,22 @@ class MasterSession < ApplicationRecord
     created_at > DATE_LIMIT.days.ago
   end
 
+  def self.destroy_old_sessions(user)
+    master_sessions = MasterSession.where(user_id: user.id)
+    ActiveRecord::Base.transaction do
+      master_sessions.each do |master_session|
+        master_session.destroy! unless master_session.available?
+      end
+    end
+  end
+
+  def self.destroy_sessions(user)
+    master_sessions = MasterSession.where(user_id: user.id)
+    ActiveRecord::Base.transaction do
+      master_sessions.each(&:destroy!)
+    end
+  end
+
   private
 
   def generate_token

@@ -5,18 +5,14 @@ module Api
     class UsersController < ApplicationController
       include LoginHelper
       include ErrorMessageHelper
-
-      SUCCESS = 'SUCCESS'
-      FAILED = 'FAILED'
-      ERROR = 'ERROR'
-      OLD_TOKEN = 'OLD_TOKEN'
+      include ResponseStatus
 
       def create
         @user = User.new(user_params)
         unless @user.valid?
           error_messages = generate_error_messages_from_errors(@user.errors.messages)
-          return render status: 400, json: generate_response(FAILED, nil)
-                                             .merge(error_messages(error_messages: error_messages))
+          return error_response json: generate_response(FAILED, nil)
+                                        .merge(error_messages(error_messages: error_messages))
         end
 
         if @user.save
@@ -24,8 +20,8 @@ module Api
           render json: generate_response(SUCCESS, message: 'activation mail has been sent')
         else
           error_messages = generate_error_messages_from_errors(@user.errors.messages)
-          render status: 400, json: generate_response(ERROR, nil)
-                                      .merge(error_messages(error_messages: error_messages))
+          render error_response json: generate_response(ERROR, nil)
+                                        .merge(error_messages(error_messages: error_messages))
         end
       end
 
@@ -36,121 +32,126 @@ module Api
             @session_user = User.find_by(id: onetime_session.user_id)
           elsif !token_available?(user_token_from_get_params)
             message = 'onetime token is unavailable'
-            return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                               .merge(error_messages(key: 'token', message: message))
+            return error_response json: generate_response(OLD_TOKEN, message: message)
+                                          .merge(error_messages(key: 'token', message: message))
           end
         end
 
-        selected_users = User.where(['name LIKE ?', "#{user_name}%"]).limit(100)
+        selected_user = User.find_by(name: user_name)
         if user_name.nil?
           message = 'invalid user name'
-          return render status: 400, json: generate_response(FAILED, message: message)
-                                             .merge(error_messages(key: 'name', message: message))
+          return error_response json: generate_response(FAILED, message: message)
+                                        .merge(error_messages(key: 'name', message: message))
         end
 
-        body = selected_users.map do |selected_user|
-          next unless selected_user.activated?
+        unless selected_user.activated?
+          response_json = generate_response(FAILED, nil)
+          response_json.merge(error_messages(key: 'id', message: 'a user is not found by the id'))
+          return error_response(status: 404, json: response_json)
+        end
 
-          {
-            name: selected_user.name,
-            nickname: selected_user.nickname,
-            explanation: selected_user.explanation,
-            icon: selected_user.icon,
-            is_admin: selected_user.admin?,
-            is_mypage: @session_user == selected_user
-          }
-        end.compact
-        render json: generate_response(SUCCESS, body)
+        render json: generate_response(SUCCESS, user_info(selected_user))
       end
 
       def update
         unless user_tokens[:onetime]
           message = 'property onetime of token is empty'
-          return render status: 400, json: generate_response(FAILED, message: message)
-                                             .merge(error_messages(key: 'token', message: message))
+          return error_response json: generate_response(FAILED, message: message)
+                                        .merge(error_messages(key: 'token', message: message))
         end
 
         onetime_session = login?(user_tokens[:onetime])
         unless onetime_session
           message = 'you are not logged in'
-          return render status: 400, json: generate_response(FAILED, message: message)
-                                             .merge(error_messages(key: 'login', message: message))
+          return error_response json: generate_response(FAILED, message: message)
+                                        .merge(error_messages(key: 'login', message: message))
         end
 
         unless token_available?(user_tokens[:onetime])
           message = 'onetime token is too old'
-          return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                             .merge(error_messages(key: 'token', message: message))
+          return error_response json: generate_response(OLD_TOKEN, message: message)
+                                        .merge(error_messages(key: 'token', message: message))
         end
 
         selected_user = User.find_by(name: user_name)
         unless selected_user
           message = 'invalid user name'
-          return render status: 400, json: generate_response(FAILED, message: message)
-                                             .merge(error_messages(key: 'name', message: message))
+          return error_response json: generate_response(FAILED, message: message)
+                                        .merge(error_messages(key: 'name', message: message))
         end
 
         session_user = onetime_session.user
 
         unless session_user.admin? || session_user == selected_user
           message = 'you are not admin'
-          return render status: 400, json: generate_response(ERROR, message: message)
-                                             .merge(error_messages(key: 'admin', message: message))
+          return error_response json: generate_response(ERROR, message: message)
+                                        .merge(error_messages(key: 'admin', message: message))
         end
 
         if update_selected_user(selected_user)
           render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
         else
           error_messages = generate_error_messages_from_errors(selected_user.errors.messages)
-          render status: 400, json: generate_response(FAILED, nil)
-                                      .merge(error_messages(error_messages: error_messages))
+          error_response json: generate_response(FAILED, nil)
+                                 .merge(error_messages(error_messages: error_messages))
         end
       end
 
       def destroy
         if user_token_from_get_params.nil?
           message = 'property onetime of token is empty'
-          return render status: 400, json: generate_response(FAILED, message: message)
-                                             .merge(error_messages(key: 'token', message: message))
+          return error_response json: generate_response(FAILED, message: message)
+                                        .merge(error_messages(key: 'token', message: message))
         end
 
         onetime_session = login?(user_token_from_get_params)
         unless onetime_session
           message = 'you are not logged in'
-          return render status: 400, json: generate_response(FAILED, message: message)
-                                             .merge(error_messages(key: 'login', message: message))
+          return error_response json: generate_response(FAILED, message: message)
+                                        .merge(error_messages(key: 'login', message: message))
         end
 
         unless token_available?(user_token_from_get_params)
           message = 'onetime token is too old'
-          return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                             .merge(error_messages(key: 'token', message: message))
+          return error_response json: generate_response(OLD_TOKEN, message: message)
+                                        .merge(error_messages(key: 'token', message: message))
         end
 
         session_user = onetime_session.user
         selected_user = User.find_by(name: user_name)
         unless selected_user
           message = 'invalid user name'
-          return render status: 400, json: generate_response(FAILED, message: message)
-                                             .merge(error_messages(key: 'name', message: message))
+          return error_response json: generate_response(FAILED, message: message)
+                                        .merge(error_messages(key: 'name', message: message))
         end
 
         unless session_user.admin? || session_user == selected_user
           message = 'you are not admin'
-          return render status: 400, json: generate_response(ERROR, message: message)
-                                             .merge(error_messages(key: 'admin', message: message))
+          return error_response json: generate_response(ERROR, message: message)
+                                        .merge(error_messages(key: 'admin', message: message))
         end
 
         if selected_user.destroy
           render json: generate_response(SUCCESS, message: 'user is deleted successfully')
         else
           error_messages = generate_error_messages_from_errors(selected_user.errors.messages)
-          render status: 400, json: generate_response(FAILED, message: selected_user.errors.messages)
-                                      .merge(error_messages(error_messages: error_messages))
+          error_response json: generate_response(FAILED, message: selected_user.errors.messages)
+                                 .merge(error_messages(error_messages: error_messages))
         end
       end
 
       private
+
+      def user_info(selected_user)
+        {
+          name: selected_user.name,
+          nickname: selected_user.nickname,
+          explanation: selected_user.explanation,
+          icon: selected_user.icon,
+          is_admin: selected_user.admin?,
+          is_mypage: @session_user == selected_user
+        }
+      end
 
       def update_selected_user(user)
         user.transaction do

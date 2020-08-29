@@ -4,11 +4,7 @@ class Api::V1::PostsController < ApplicationController
   include ErrorMessageHelper
   include ResponseHelper
   include LoginHelper
-
-  SUCCESS = 'SUCCESS'
-  FAILED = 'FAILED'
-  ERROR = 'ERROR'
-  OLD_TOKEN = 'OLD_TOKEN'
+  include ResponseStatus
 
   before_action :get_user, only: %i[create update]
   before_action :get_session_owner, only: %i[show destroy]
@@ -33,9 +29,7 @@ class Api::V1::PostsController < ApplicationController
       return render json: generate_response(SUCCESS, 'post has been created successfully')
     end
 
-    error_messages = generate_error_messages_from_errors(post.errors.messages)
-    render status: 400, json: generate_response(FAILED, nil)
-                                .merge(error_messages(error_messages: error_messages))
+    render_error_message(post)
   end
 
   # edit the post
@@ -54,9 +48,7 @@ class Api::V1::PostsController < ApplicationController
       return render json: generate_response(SUCCESS, 'the post is updated successfully')
     end
 
-    error_messages = generate_error_messages_from_errors(post.errors.messages)
-    render status: 400, json: generate_response(FAILED, nil)
-                                .merge(error_messages(error_messages: error_messages))
+    render_error_message(post)
   end
 
   # show the post
@@ -86,6 +78,12 @@ class Api::V1::PostsController < ApplicationController
   end
 
   private
+
+  def render_error_message(post)
+    error_messages = generate_error_messages_from_errors(post.errors.messages)
+    render status: 400, json: generate_response(FAILED, nil)
+                                .merge(error_messages(error_messages: error_messages))
+  end
 
   def get_session_owner
     # パラメーターにtokenがあり、かつ、そのトークンがセッションに存在し、期限が切れていなかったら返信パラメーターにis_mine=trueを入れる。
