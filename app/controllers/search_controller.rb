@@ -25,11 +25,12 @@ class SearchController < ApplicationController
 
   private
 
-  def render_results(results)
+  def render_results(results, hit_count = 0)
     body = {
       results: results,
       results_size: results.size,
-      page_number: turn_pages
+      page_number: turn_pages,
+      hit_total: hit_count
     }
     render json: generate_response(SUCCESS, body)
   end
