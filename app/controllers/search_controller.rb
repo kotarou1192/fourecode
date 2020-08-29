@@ -6,6 +6,8 @@ class SearchController < ApplicationController
   include LoginHelper
   include ResponseStatusHelper
 
+  MAXIMUM_CONTENTS_COUNT = 1000
+
   attr_accessor :max_keywords_count, :search_results_count, :search_string_offset
   attr_reader :keywords
 
@@ -89,6 +91,7 @@ class SearchController < ApplicationController
   # 指定がなければ１ページの表示数はデフォルトを使用する
   def max_content
     return @search_results_count unless params[:max_content]&.is_a?(Integer)
+    return MAXIMUM_CONTENTS_COUNT if params[:max_content] > MAXIMUM_CONTENTS_COUNT
 
     params.permit(:max_content)[:max_content]
   end
