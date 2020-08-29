@@ -13,8 +13,8 @@ Rails.application.routes.draw do
       get '/auth', to: 'auth#index'
       post '/password_resets', to: 'password_resets#create'
       put '/password_resets', to: 'password_resets#update'
-      get '/search/posts', to: 'search#search_posts'
-      get '/search/users', to: 'search#search_users'
+      get '/search/posts', to: 'posts_searches#search'
+      get '/search/users', to: 'users_searches#search'
     end
   end
 end
