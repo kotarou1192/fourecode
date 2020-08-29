@@ -35,7 +35,8 @@ statusの文字列が正しくない場合は無視されます。
             }
         ],
         "results_size": 50,
-        "page_number": 1
+        "page_number": 1,
+        "hit_total": 120008
     }
 }
 ```
