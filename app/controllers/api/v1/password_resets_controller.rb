@@ -2,7 +2,7 @@
 
 class Api::V1::PasswordResetsController < ApplicationController
   include ErrorMessageHelper
-  include ResponseStatusHelper
+  include ResponseStatus
 
   # PUTで呼び出す
   # パラメーターの内容

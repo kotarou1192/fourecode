@@ -4,7 +4,7 @@ class SearchController < ApplicationController
   include ErrorMessageHelper
   include ResponseHelper
   include LoginHelper
-  include ResponseStatusHelper
+  include ResponseStatus
 
   MAXIMUM_CONTENTS_COUNT = 1000
 

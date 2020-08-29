@@ -5,7 +5,7 @@ module Api
     class UsersController < ApplicationController
       include LoginHelper
       include ErrorMessageHelper
-      include ResponseStatusHelper
+      include ResponseStatus
 
       def create
         @user = User.new(user_params)

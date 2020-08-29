@@ -4,7 +4,7 @@ class Api::V1::PostsController < ApplicationController
   include ErrorMessageHelper
   include ResponseHelper
   include LoginHelper
-  include ResponseStatusHelper
+  include ResponseStatus
 
   before_action :get_user, only: %i[create update]
   before_action :get_session_owner, only: %i[show destroy]

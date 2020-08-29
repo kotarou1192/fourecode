@@ -4,7 +4,7 @@ module Api
   module V1
     class AuthController < ApplicationController
       include ErrorMessageHelper
-      include ResponseStatusHelper
+      include ResponseStatus
 
       # log-in
       def create

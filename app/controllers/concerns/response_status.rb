@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ResponseStatusHelper
+module ResponseStatus
   extend ActiveSupport::Concern
 
   SUCCESS = 'SUCCESS'
