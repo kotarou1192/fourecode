@@ -7,9 +7,9 @@ class Api::V1::PostsSearchesController < SearchController
   def search
     return if too_many_keywords?
 
-    posts_array = Post.find_posts(keywords, post_status, turn_pages, max_content)
+    posts = Post.find_posts(keywords, post_status, turn_pages, max_content)
 
-    results = generate_results(posts_array, keywords)
+    results = generate_results(posts, keywords)
     hit_count = Post.count_hit(keywords, post_status)
 
     render_results(results, hit_count)
