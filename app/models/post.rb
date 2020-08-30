@@ -102,7 +102,7 @@ class Post < ApplicationRecord
       return (Arel::Table.new :result)[:user_id].matches('%_%')
     end
 
-    (Arel::Table.new :result)[:user_id].matches(user ? user.id : nil)
+    (Arel::Table.new :result)[:user_id].eq(user ? user.id : nil)
   end
 
   def set_default_reward
