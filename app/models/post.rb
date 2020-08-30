@@ -46,13 +46,14 @@ class Post < ApplicationRecord
     end
   end
 
-  def self.count_hit(keywords, post_state)
-    Post.find_by_sql(Post.arel_table
-                       .project('result.id')
-                       .from(join_keywords_results(keywords).as('result'))
-                       .where(set_post_state(post_state))
-                       .distinct('result.id')
-                       .to_sql).count
+  def self.count_hit(keywords, post_state, author)
+    Post.count_by_sql(Post.arel_table
+                        .project('count(*)')
+                        .from(join_keywords_results(keywords).as('result'))
+                        .where(set_post_state(post_state)
+                                 .and(set_author(author)))
+                        .distinct('result.id')
+                        .to_sql)
   end
 
   def self.find_posts(keywords, post_state, author, page, max_content)

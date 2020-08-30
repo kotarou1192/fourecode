@@ -10,7 +10,7 @@ class Api::V1::PostsSearchesController < SearchController
     posts = Post.find_posts(keywords, post_status, author, turn_pages, max_content)
 
     results = generate_results(posts, keywords)
-    hit_count = Post.count_hit(keywords, post_status)
+    hit_count = Post.count_hit(keywords, post_status, author)
 
     render_results(results, hit_count)
   end
