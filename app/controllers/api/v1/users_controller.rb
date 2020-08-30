@@ -38,13 +38,8 @@ module Api
         end
 
         selected_user = User.find_by(name: user_name)
-        if user_name.nil?
-          message = 'invalid user name'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'name', message: message))
-        end
 
-        unless selected_user.activated?
+        unless selected_user&.activated?
           response_json = generate_response(FAILED, nil)
           response_json.merge(error_messages(key: 'id', message: 'a user is not found by the id'))
           return error_response(status: 404, json: response_json)
