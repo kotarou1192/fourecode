@@ -46,7 +46,7 @@ class Post < ApplicationRecord
     end
   end
 
-  def self.count_hit(keywords, post_state, author)
+  def self.count_search_results(keywords, post_state, author)
     Post.count_by_sql(Post.arel_table
                         .project('count(*)')
                         .from(join_keywords_results(keywords).as('result'))
