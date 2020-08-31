@@ -7,7 +7,7 @@ class Api::V1::UsersSearchesController < SearchController
     users = User.find_users(keywords, turn_pages, max_content)
 
     results = generate_results(users)
-    hit_count = User.count_hit(keywords)
+    hit_count = User.count_search_results(keywords)
 
     render_results(results, hit_count)
   end
