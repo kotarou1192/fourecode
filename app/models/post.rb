@@ -46,25 +46,29 @@ class Post < ApplicationRecord
     end
   end
 
-  def self.count_hit(keywords, post_state)
-    Post.find_by_sql(Post.arel_table
-                       .project('result.id')
-                       .from(join_keywords_results(keywords).as('result'))
-                       .where(set_post_state(post_state))
-                       .distinct('result.id')
-                       .to_sql).count
+  def self.count_search_results(keywords, post_state, author)
+    Post.count_by_sql(Post.arel_table
+                        .project('count(*)')
+                        .from(join_keywords_results(keywords).as('result'))
+                        .where(set_post_state(post_state)
+                                 .and(set_author(author)))
+                        .distinct('result.id')
+                        .to_sql)
   end
 
-  def self.find_posts(keywords, post_state, page, max_content)
+  def self.find_posts(keywords, post_state, author, page, max_content)
     Post.find_by_sql(Post.arel_table
                        .project('result.id', 'result.title',
                                 'result.body', 'result.code',
-                                'result.state', 'result.bestanswer_reward')
+                                'result.state', 'result.bestanswer_reward',
+                                'result.user_id')
                        .from(join_keywords_results(keywords).as('result'))
-                       .where(set_post_state(post_state))
+                       .where(set_post_state(post_state)
+                                .and(set_author(author)))
                        .group('result.id', 'result.title',
                               'result.body', 'result.code',
-                              'result.state', 'result.bestanswer_reward')
+                              'result.state', 'result.bestanswer_reward',
+                              'result.user_id')
                        .order('count(*) desc, result.id desc') # ここに評価値みたいなのを入れるといいかもしれない
                        .take(max_content)
                        .skip(max_content * (page - 1))
@@ -89,6 +93,16 @@ class Post < ApplicationRecord
 
   def self.set_post_state(post_status)
     (Arel::Table.new :result)[:state].matches(post_status)
+  end
+
+  # 引数はユーザー名か空文字かnil
+  def self.set_author(author)
+    user = User.find_by(name: author)
+    if author.nil? || author.empty?
+      return (Arel::Table.new :result)[:user_id].matches('%_%')
+    end
+
+    (Arel::Table.new :result)[:user_id].eq(user ? user.id : nil)
   end
 
   def set_default_reward

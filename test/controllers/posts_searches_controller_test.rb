@@ -49,4 +49,15 @@ class PostsSearchesControllerTest < ActionDispatch::IntegrationTest
 
     assert body['body']['results'].empty?
   end
+
+  test 'posts count should be 10' do
+    10.times do
+      @user.posts.create(title: 'hoge', body: 'hoge', code: 'hoge', source_url: 'test')
+    end
+
+    get '/api/v1/search/posts', params: { keyword: 'hoge', author: @user.name }
+    body = JSON.parse(response.body)
+
+    assert body['body']['hit_total'] == 10
+  end
 end

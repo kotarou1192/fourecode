@@ -85,7 +85,7 @@ class User < ApplicationRecord
                        .to_sql)
   end
 
-  def self.count_hit(keywords)
+  def self.count_search_results(keywords)
     Post.find_by_sql(Post.arel_table
                        .project('result.id')
                        .from(keywords_results_from_users(keywords).as('result'))
