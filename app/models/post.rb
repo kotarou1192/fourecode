@@ -25,12 +25,12 @@ class Post < ApplicationRecord
     update_attribute(:state, state)
   end
 
-  def resolve
-    change_state('resolved')
+  def close
+    change_state('closed')
   end
 
-  def resolved?
-    state == 'resolved'
+  def closed?
+    state == 'closed'
   end
 
   def ask_to(users)

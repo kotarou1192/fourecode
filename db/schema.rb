@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_01_015235) do
+ActiveRecord::Schema.define(version: 2020_09_01_030647) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -50,7 +50,7 @@ ActiveRecord::Schema.define(version: 2020_09_01_015235) do
     t.string "title"
     t.integer "bestanswer_reward"
     t.string "source_url"
-    t.string "state", default: "accepting"
+    t.string "state", default: "open"
     t.text "body"
     t.text "code"
     t.datetime "created_at", precision: 6, null: false
