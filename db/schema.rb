@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_25_135639) do
+ActiveRecord::Schema.define(version: 2020_09_01_015235) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -61,6 +61,16 @@ ActiveRecord::Schema.define(version: 2020_08_25_135639) do
     t.index ["title"], name: "index_posts_on_title"
   end
 
+  create_table "reviews", force: :cascade do |t|
+    t.text "body"
+    t.integer "thrown_coins", default: 0
+    t.string "user_id"
+    t.bigint "post_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["post_id"], name: "index_reviews_on_post_id"
+  end
+
   create_table "users", id: :string, limit: 36, force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -83,4 +93,6 @@ ActiveRecord::Schema.define(version: 2020_08_25_135639) do
   add_foreign_key "onetime_sessions", "users"
   add_foreign_key "password_reset_sessions", "users"
   add_foreign_key "posts", "users"
+  add_foreign_key "reviews", "posts"
+  add_foreign_key "reviews", "users"
 end
