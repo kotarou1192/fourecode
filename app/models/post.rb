@@ -1,6 +1,6 @@
 class Post < ApplicationRecord
   DEFAULT_REWARD = 100
-  DEFINED_STATES = %w[accepting voting resolved].freeze
+  DEFINED_STATES = %w[open closed].freeze
   MAX_REWARD = 500
   MIN_REWARD = 0
   BODY_MAX_CHARS = 10000
