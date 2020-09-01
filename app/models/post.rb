@@ -15,6 +15,7 @@ class Post < ApplicationRecord
   validates :source_url, presence: true, if: :url_exists?, allow_nil: true
 
   has_many :asked_users, dependent: :destroy
+  has_many :reviews, dependent: :destroy
   belongs_to :user
 
   def change_state(state)
