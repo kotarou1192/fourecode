@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_01_030647) do
+ActiveRecord::Schema.define(version: 2020_09_04_004231) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -61,6 +61,23 @@ ActiveRecord::Schema.define(version: 2020_09_01_030647) do
     t.index ["title"], name: "index_posts_on_title"
   end
 
+  create_table "review_coin_transactions", force: :cascade do |t|
+    t.string "from"
+    t.string "to"
+    t.bigint "review_id"
+    t.integer "amount"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["review_id"], name: "index_review_coin_transactions_on_review_id"
+  end
+
+  create_table "review_links", force: :cascade do |t|
+    t.integer "from"
+    t.integer "to"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "reviews", force: :cascade do |t|
     t.text "body"
     t.integer "thrown_coins", default: 0
@@ -68,6 +85,7 @@ ActiveRecord::Schema.define(version: 2020_09_01_030647) do
     t.bigint "post_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "primary"
     t.index ["post_id"], name: "index_reviews_on_post_id"
   end
 
@@ -84,6 +102,7 @@ ActiveRecord::Schema.define(version: 2020_09_01_030647) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "icon"
     t.string "explanation"
+    t.integer "coins"
   end
 
   add_foreign_key "asked_users", "posts"
@@ -93,6 +112,11 @@ ActiveRecord::Schema.define(version: 2020_09_01_030647) do
   add_foreign_key "onetime_sessions", "users"
   add_foreign_key "password_reset_sessions", "users"
   add_foreign_key "posts", "users"
+  add_foreign_key "review_coin_transactions", "reviews"
+  add_foreign_key "review_coin_transactions", "users", column: "from"
+  add_foreign_key "review_coin_transactions", "users", column: "to"
+  add_foreign_key "review_links", "reviews", column: "from"
+  add_foreign_key "review_links", "reviews", column: "to"
   add_foreign_key "reviews", "posts"
   add_foreign_key "reviews", "users"
 end
