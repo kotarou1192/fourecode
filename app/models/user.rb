@@ -3,7 +3,8 @@
 class User < ApplicationRecord
   attr_accessor :activation_token, :password
   before_save :downcase_email
-  before_create :create_activation_digest, :generate_uuid, :create_password_digest, :set_default_nickname
+  before_create :create_activation_digest, :generate_uuid, :create_password_digest,
+                :set_default_nickname, :grant_default_coin
 
   VALID_NAME_REGEX = /\A[a-zA-Z0-9-]+\z/
   validates :nickname, format: { with: VALID_NAME_REGEX }, presence: true, length: { maximum: 30 }, if: :nickname_exists?, allow_nil: true
@@ -14,6 +15,7 @@ class User < ApplicationRecord
             uniqueness: true
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
   validates :explanation, presence: true, length: { maximum: 255 }, allow_nil: true
+  validates :coins, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   has_many :master_session, dependent: :destroy
   has_many :onetime_session, dependent: :destroy
@@ -22,6 +24,8 @@ class User < ApplicationRecord
   has_one :password_reset_session, dependent: :destroy
 
   mount_uploader :icon, ImageUploader
+
+  DEFAULT_COINS = 3000
 
   def self.new_token
     SecureRandom.hex(64)
@@ -86,12 +90,36 @@ class User < ApplicationRecord
   end
 
   def self.count_search_results(keywords)
-    Post.find_by_sql(Post.arel_table
-                       .project('result.id')
-                       .from(keywords_results_from_users(keywords).as('result'))
-                       .where(set_user_state(true))
-                       .distinct('result.id')
-                       .to_sql).count
+    Post.count_by_sql(Post.arel_table
+                        .project('count(*)')
+                        .from(keywords_results_from_users(keywords).as('result'))
+                        .where(set_user_state(true))
+                        .distinct('result.id')
+                        .to_sql)
+  end
+
+  # 所持金からamountを引く
+  # ==Argument
+  # * amount :: Integer
+  # ==Return
+  # * 成功 # => true
+  # * 失敗 # => 例外(RecordInvalid, ArgumentError)
+  def take_coins(amount)
+    raise ArgumentError if amount.negative?
+
+    update!(coins: coins - amount)
+  end
+
+  # 所持金にamountを足す
+  # ==Argument
+  # * amount :: Integer
+  # ==Return
+  # * 成功 # => true
+  # * 失敗 # => 例外(ArgumentError)
+  def add_coins(amount)
+    raise ArgumentError if amount.negative?
+
+    update!(coins: coins + amount)
   end
 
   private
@@ -139,5 +167,9 @@ class User < ApplicationRecord
       break unless User.find_by(id: @uuid)
     end
     self.id = @uuid
+  end
+
+  def grant_default_coin
+    self.coins = DEFAULT_COINS
   end
 end
