@@ -33,8 +33,8 @@ class Review < ApplicationRecord
   # * body   :: String
   # * user   :: User
   # ==Return
-  # 成功 # => Review
-  # 失敗 # => ActiveRecord::RecordInvalid | ArgumentError
+  # 成功またはRecordInvalid # => Review
+  # 失敗(レスポンスにレスしようとした) # => ArgumentError
   def reply(body:, user:)
     if ReviewLink.response?(self)
       raise ArgumentError, 'can not response to response'
@@ -46,6 +46,8 @@ class Review < ApplicationRecord
     transaction do
       response.save!
       ReviewLink.create!(from: id, to: response.id)
+    rescue ActiveRecord::RecordInvalid
+      return response
     end
     response
   end
