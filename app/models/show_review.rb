@@ -40,7 +40,7 @@ class ShowReview < ApplicationRecord
   #       body,
   #       created_at,
   #       thrown_coins,
-  #       reviewer: {
+  #       responder: {
   #         name,
   #         nickname,
   #         icon
