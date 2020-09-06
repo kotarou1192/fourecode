@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::PostsController < ApplicationController
-  include ErrorMessageHelper
-  include ResponseHelper
-  include LoginHelper
-  include ResponseStatus
+  include UserHelper
 
   before_action :get_user, only: %i[create update]
   before_action :get_session_owner, only: %i[show destroy]
@@ -85,42 +82,6 @@ class Api::V1::PostsController < ApplicationController
                                 .merge(error_messages(error_messages: error_messages))
   end
 
-  def get_session_owner
-    # パラメーターにtokenがあり、かつ、そのトークンがセッションに存在し、期限が切れていなかったら返信パラメーターにis_mine=trueを入れる。
-    # トークンの期限が切れていれば400エラーを発生させる
-    return unless user_token_from_flat_params
-
-    onetime_session = login?(user_token_from_flat_params)
-    if onetime_session&.available?
-      @session_user = onetime_session.user
-    elsif onetime_session && !onetime_session.available?
-      message = 'onetime token is unavailable'
-      render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                  .merge(error_messages(key: 'token', message: message))
-    end
-  end
-
-  def get_user
-    unless user_token_from_nest_params[:onetime]
-      return render status: 400, json: generate_response(FAILED, nil)
-                                         .merge(error_messages(key: 'token', message: 'onetime token is empty'))
-    end
-
-    onetime_session = login?(user_token_from_nest_params[:onetime])
-    unless onetime_session
-      message = 'you are not logged in'
-      return render status: 400, json: generate_response(FAILED, message: message)
-                                         .merge(error_messages(key: 'login', message: message))
-    end
-    unless onetime_session.available?
-      message = 'onetime token is too old'
-      return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                         .merge(error_messages(key: 'token', message: message))
-    end
-
-    @user = onetime_session.user
-  end
-
   def post_info(post)
     user = post.user
     {
@@ -139,12 +100,6 @@ class Api::V1::PostsController < ApplicationController
     }
   end
 
-  def user_token_from_flat_params
-    return nil unless params[:token]
-
-    params.permit(:token)[:token]
-  end
-
   def post_id
     return nil unless params[:id]
 
@@ -157,11 +112,5 @@ class Api::V1::PostsController < ApplicationController
 
   def update_params
     params.require(:value).permit(:body, :code, :source_url)
-  end
-
-  def user_token_from_nest_params
-    return {} unless params[:token]
-
-    params.require(:token).permit(:onetime)
   end
 end
