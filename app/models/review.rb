@@ -30,7 +30,6 @@ class Review < ApplicationRecord
 
   # 対象のレビューに指定のユーザーがリプライをするメソッド
   # ==Arguments
-  # * review :: Review
   # * body   :: String
   # * user   :: User
   # ==Return
