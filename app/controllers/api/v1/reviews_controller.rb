@@ -37,12 +37,6 @@ class Api::V1::ReviewsController < ApplicationController
 
   private
 
-  def failed_to_create(response)
-    messages = generate_error_messages_from_errors(response.errors.messages)
-    error_response json: generate_response(FAILED, nil)
-                           .merge(error_messages(error_messages: messages))
-  end
-
   def post_id
     return nil unless params[:id]
 

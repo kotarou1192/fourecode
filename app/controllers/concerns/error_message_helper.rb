@@ -22,4 +22,10 @@ module ErrorMessageHelper
   def error_response(status: 400, json:)
     render status: status, json: json
   end
+
+  def failed_to_create(model)
+    messages = generate_error_messages_from_errors(model.errors.messages)
+    error_response json: generate_response(FAILED, nil)
+                           .merge(error_messages(error_messages: messages))
+  end
 end
