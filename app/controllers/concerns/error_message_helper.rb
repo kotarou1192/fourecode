@@ -2,6 +2,7 @@
 
 module ErrorMessageHelper
   extend ActiveSupport::Concern
+  include ResponseStatus
 
   def generate_error_messages_from_errors(messages)
     messages.map do |key, value|
@@ -25,7 +26,7 @@ module ErrorMessageHelper
 
   def failed_to_create(model)
     messages = generate_error_messages_from_errors(model.errors.messages)
-    error_response json: generate_response(FAILED, nil)
+    error_response json: generate_response(ResponseStatus::FAILED, nil)
                            .merge(error_messages(error_messages: messages))
   end
 end
