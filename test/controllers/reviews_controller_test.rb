@@ -34,8 +34,9 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
   test 'reviews and responses should be shown' do
     get "/api/v1/posts/#{@post.id}/reviews", params: {}
     get_body
-    assert @body['body'].first['id'] == @review.id
-    assert @body['body'].first['responses'].first['id'] == @res.id
+    assert @body['body']['reviews'].first['id'] == @review.id
+    assert @body['body']['reviews'].first['responses'].first['id'] == @res.id
+    assert @body['body']['total_contents_count'] == 1
   end
 
   test 'should be created' do

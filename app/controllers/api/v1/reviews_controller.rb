@@ -4,6 +4,9 @@
 class Api::V1::ReviewsController < ApplicationController
   include UserHelper
 
+  MAXIMUM_CONTENTS_COUNT = 1000
+  DEFAULT_CONTENTS_COUNT = 50
+
   before_action :get_user, only: %i[create]
   # before_action :get_session_owner, only: %i[show]
 
@@ -33,9 +36,16 @@ class Api::V1::ReviewsController < ApplicationController
   end
 
   # postに紐づくレビューとレスポンスを取得するメソッド
+  # 件数も表示する
   def show
-    body = ShowReview.show(post_id)
-    render json: generate_response(SUCCESS, body)
+    reviews_and_responses = ShowReview.show(post_id, max_contents_count, page_number)
+    comments_count = ShowReview.count_reviews_and_responses(post_id)
+    results = {
+      reviews: reviews_and_responses,
+      total_contents_count: comments_count,
+      page_number: page_number
+    }
+    render json: generate_response(SUCCESS, results)
   end
 
   private
@@ -50,5 +60,18 @@ class Api::V1::ReviewsController < ApplicationController
     return nil unless params[:value] && params[:value][:body]
 
     params.require(:value).permit(:body)[:body]
+  end
+
+  def page_number
+    return 1 unless params[:page_number]
+
+    params.permit(:page_number)[:page_number]
+  end
+
+  def max_contents_count
+    return DEFAULT_CONTENTS_COUNT unless params[:max_content]&.is_a?(Integer)
+    return MAXIMUM_CONTENTS_COUNT if params[:max_content] > MAXIMUM_CONTENTS_COUNT
+
+    params.permit(:max_content)[:max_content]
   end
 end

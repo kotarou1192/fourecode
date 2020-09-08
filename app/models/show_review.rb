@@ -20,9 +20,12 @@
 # * responder_icon
 # * response_thrown_coins :: integer
 class ShowReview < ApplicationRecord
+  DEFAULT_MAX_CONTENTS_COUNT = 50
   # ポストに紐づくレビューとレスポンスを表現したハッシュを返す
   # ==Argument
-  # * post_id :: integer
+  # * post_id      :: integer
+  # * max_contents :: 1ページに表示するコンテンツ量(integer)
+  # * page         :: 何ページ目を表示するか(integer)
   # ==Returns
   # [
   #   {
@@ -50,10 +53,15 @@ class ShowReview < ApplicationRecord
   #   }
   # ]
   #
-  def self.show(post_id)
-    reviews_responses_mix = where(post_id: post_id)
+  def self.show(post_id, max_contents = DEFAULT_MAX_CONTENTS_COUNT, page = 1)
+    reviews_responses_mix = where(post_id: post_id).offset(max_contents * (page - 1)).limit(max_contents)
     reviews, responses = split_reviews_and_responses(reviews_responses_mix)
     merge_responses_to_reviews(reviews, responses)
+  end
+
+  # post_idに紐づくレビューとレスポンスの数を数える
+  def self.count_reviews_and_responses(post_id)
+    where(post_id: post_id).count
   end
 
   private
