@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       # routing for reviews and responses
       get '/posts/:id/reviews', to: 'reviews#show'
       post '/posts/:id/reviews', to: 'reviews#create'
+      post '/posts/:id/reviews/:review_id', to: 'responses#create'
     end
   end
 end
