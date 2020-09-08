@@ -33,6 +33,21 @@ class ReviewTest < ActiveSupport::TestCase
     assert @review.reply(body: 'hogehoge', user: @user)
   end
 
+  test 'empty body should not be valid' do
+    @review.body = ''
+    assert_not @review.valid?
+  end
+
+  test 'blank body should not be valid' do
+    @review.body = ' '
+    assert_not @review.valid?
+  end
+
+  test 'too long body should not be valid' do
+    @review.body = 'a' * (Review::BODY_MAX_CHARS + 1)
+    assert_not @review.valid?
+  end
+
   test 'can not reply response' do
     reply = @review.reply(body: 'hogehoge', user: @user)
     begin
