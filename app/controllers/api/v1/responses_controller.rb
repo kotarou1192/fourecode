@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+# レビューに対するレスポンスを取り扱うためのコントローラー
 class Api::V1::ResponsesController < ApplicationController
   include UserHelper
 
   before_action :get_user, only: %i[create]
 
+  # reviewに対するresponseを作成するメソッド
   def create
     return unless @user
 
@@ -37,6 +39,7 @@ class Api::V1::ResponsesController < ApplicationController
 
   private
 
+  # responseかreviewかを調べるためのメソッド
   def response?(review)
     if ReviewLink.response?(review)
       message = 'can not response to a response'

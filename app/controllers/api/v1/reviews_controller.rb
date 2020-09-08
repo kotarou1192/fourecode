@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+# レビューに関する操作を集めたコントローラー
 class Api::V1::ReviewsController < ApplicationController
   include UserHelper
 
   before_action :get_user, only: %i[create]
   # before_action :get_session_owner, only: %i[show]
 
+  # postに対するレビューを投稿するメソッド
   def create
     return unless @user
 
@@ -30,6 +32,7 @@ class Api::V1::ReviewsController < ApplicationController
     failed_to_create review
   end
 
+  # postに紐づくレビューとレスポンスを取得するメソッド
   def show
     body = ShowReview.show(post_id)
     render json: generate_response(SUCCESS, body)
