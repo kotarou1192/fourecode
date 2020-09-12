@@ -28,6 +28,11 @@ class Review < ApplicationRecord
     review
   end
 
+  def self.count_by_user_name(user_name)
+    user = User.find_by(name: user_name)
+    where(user_id: user ? user.id : nil).count
+  end
+
   # 対象のレビューに指定のユーザーがリプライをするメソッド
   # ==Arguments
   # * body   :: String

@@ -59,6 +59,14 @@ class ShowReview < ApplicationRecord
     merge_responses_to_reviews(reviews, responses)
   end
 
+  # 上のshowのuser_name版。
+  def self.show_by_user_name(user_name, max_contents = DEFAULT_MAX_CONTENTS_COUNT, page = 1)
+    reviews_responses_mix = where(reviewer_name: user_name).or(where(responder_name: user_name))
+                              .offset(max_contents * (page - 1)).limit(max_contents)
+    reviews, responses = split_reviews_and_responses(reviews_responses_mix)
+    merge_responses_to_reviews(reviews, responses)
+  end
+
   # post_idに紐づくレビューとレスポンスの数を数える
   def self.count_reviews_and_responses(post_id)
     where(post_id: post_id).count

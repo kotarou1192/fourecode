@@ -38,8 +38,16 @@ class Api::V1::ReviewsController < ApplicationController
   # postに紐づくレビューとレスポンスを取得するメソッド
   # 件数も表示する
   def show
-    reviews_and_responses = ShowReview.show(post_id, max_contents_count, page_number)
-    comments_count = ShowReview.count_reviews_and_responses(post_id)
+    reviews_and_responses = if user_name
+                              ShowReview.show_by_user_name(user_name, max_contents_count, page_number)
+                            else
+                              ShowReview.show(post_id, max_contents_count, page_number)
+                            end
+    comments_count = if user_name
+                       Review.count_by_user_name(user_name)
+                     else
+                       ShowReview.count_reviews_and_responses(post_id)
+                     end
     results = {
       reviews: reviews_and_responses,
       total_contents_count: comments_count,
@@ -49,6 +57,12 @@ class Api::V1::ReviewsController < ApplicationController
   end
 
   private
+
+  def user_name
+    return nil unless params[:name]
+
+    params.permit(:name)[:name]
+  end
 
   def post_id
     return nil unless params[:id]

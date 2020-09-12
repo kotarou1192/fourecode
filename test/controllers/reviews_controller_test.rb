@@ -57,4 +57,11 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
     assert @body['status'] == 'FAILED'
     assert @body['errors'].first['key'] == 'closed'
   end
+
+  test 'reviews should be shown by username' do
+    get "/api/v1/users/#{@user.name}/reviews"
+    get_body
+    assert @body['status'] == 'SUCCESS'
+    assert @body['body']['total_contents_count'] == 2
+  end
 end
