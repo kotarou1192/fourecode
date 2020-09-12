@@ -21,7 +21,7 @@
 # * response_thrown_coins :: integer
 class ShowReview < ApplicationRecord
   DEFAULT_MAX_CONTENTS_COUNT = 50
-  # ポストに紐づくレビューとレスポンスを表現したハッシュを返す
+  # ポストに紐づくレビューとレスポンスを表現したハッシュの配列を返す
   # ==Argument
   # * post_id      :: integer
   # * max_contents :: 1ページに表示するコンテンツ量(integer)
