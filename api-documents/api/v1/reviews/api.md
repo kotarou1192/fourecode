@@ -16,6 +16,7 @@
 成功すればbodyのstatusにSUCCESSが、それ以外はFAILEDが入る。詳細はErrorsのKey（別途ドキュメント）を参照のこと。
 
 #### get /api/v1/posts/id/reviews
+#### get /api/v1/users/name/reviews
 
 required params
 ```json
@@ -26,6 +27,7 @@ required params
 ```
 
 URLのidは投稿のID  
+URLのnameはユーザーの名前  
 log-inしていなくても見れる。
 
 ##### レスポンスの中身の例
