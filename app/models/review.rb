@@ -28,6 +28,11 @@ class Review < ApplicationRecord
     review
   end
 
+  # post_idに紐づくレビューとレスポンスの数を数える
+  def self.count_by_post_id(post_id)
+    where(post_id: post_id).count
+  end
+
   def self.count_by_user_name(user_name)
     user = User.find_by(name: user_name)
     where(user_id: user ? user.id : nil).count

@@ -46,7 +46,7 @@ class Api::V1::ReviewsController < ApplicationController
     comments_count = if user_name
                        Review.count_by_user_name(user_name)
                      else
-                       ShowReview.count_reviews_and_responses(post_id)
+                       Review.count_by_post_id(post_id)
                      end
     results = {
       reviews: reviews_and_responses,

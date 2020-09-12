@@ -36,7 +36,7 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
     get_body
     assert @body['body']['reviews'].first['id'] == @review.id
     assert @body['body']['reviews'].first['responses'].first['id'] == @res.id
-    assert @body['body']['total_contents_count'] == 1
+    assert @body['body']['total_contents_count'] == 2
   end
 
   test 'should be created' do

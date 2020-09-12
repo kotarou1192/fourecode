@@ -67,11 +67,6 @@ class ShowReview < ApplicationRecord
     merge_responses_to_reviews(reviews, responses)
   end
 
-  # post_idに紐づくレビューとレスポンスの数を数える
-  def self.count_reviews_and_responses(post_id)
-    where(post_id: post_id).count
-  end
-
   private
 
   def self.merge_responses_to_reviews(reviews, responses)
