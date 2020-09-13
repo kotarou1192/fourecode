@@ -76,4 +76,10 @@ class CoinControllerTest < ActiveSupport::TestCase
   test 'a invalid gift for you' do
     assert_not Coin.add(user: @from, amount: -100)
   end
+
+  test 'should not be valid' do
+    assert_not Coin.add(user: @from, amount: 3.4)
+    assert_not Coin.take(user: @from, amount: 3.4)
+    assert_not Coin.throw(amount: 10.3, from: @from, review: @review)
+  end
 end
