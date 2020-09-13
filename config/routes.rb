@@ -15,6 +15,12 @@ Rails.application.routes.draw do
       put '/password_resets', to: 'password_resets#update'
       get '/search/posts', to: 'posts_searches#search'
       get '/search/users', to: 'users_searches#search'
+
+      # routing for reviews and responses
+      get '/posts/:id/reviews', to: 'reviews#show'
+      get '/users/:name/reviews', to: 'reviews#show'
+      post '/posts/:id/reviews', to: 'reviews#create'
+      post '/posts/:id/reviews/:review_id', to: 'responses#create'
     end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_25_135639) do
+ActiveRecord::Schema.define(version: 2020_09_04_004231) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -50,7 +50,7 @@ ActiveRecord::Schema.define(version: 2020_08_25_135639) do
     t.string "title"
     t.integer "bestanswer_reward"
     t.string "source_url"
-    t.string "state", default: "accepting"
+    t.string "state", default: "open"
     t.text "body"
     t.text "code"
     t.datetime "created_at", precision: 6, null: false
@@ -59,6 +59,34 @@ ActiveRecord::Schema.define(version: 2020_08_25_135639) do
     t.index ["body"], name: "index_posts_on_body"
     t.index ["code"], name: "index_posts_on_code"
     t.index ["title"], name: "index_posts_on_title"
+  end
+
+  create_table "review_coin_transactions", force: :cascade do |t|
+    t.string "from"
+    t.string "to"
+    t.bigint "review_id"
+    t.integer "amount"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["review_id"], name: "index_review_coin_transactions_on_review_id"
+  end
+
+  create_table "review_links", force: :cascade do |t|
+    t.integer "from"
+    t.integer "to"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "reviews", force: :cascade do |t|
+    t.text "body"
+    t.integer "thrown_coins", default: 0
+    t.string "user_id"
+    t.bigint "post_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.boolean "primary"
+    t.index ["post_id"], name: "index_reviews_on_post_id"
   end
 
   create_table "users", id: :string, limit: 36, force: :cascade do |t|
@@ -74,6 +102,7 @@ ActiveRecord::Schema.define(version: 2020_08_25_135639) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "icon"
     t.string "explanation"
+    t.integer "coins"
   end
 
   add_foreign_key "asked_users", "posts"
@@ -83,4 +112,11 @@ ActiveRecord::Schema.define(version: 2020_08_25_135639) do
   add_foreign_key "onetime_sessions", "users"
   add_foreign_key "password_reset_sessions", "users"
   add_foreign_key "posts", "users"
+  add_foreign_key "review_coin_transactions", "reviews"
+  add_foreign_key "review_coin_transactions", "users", column: "from"
+  add_foreign_key "review_coin_transactions", "users", column: "to"
+  add_foreign_key "review_links", "reviews", column: "from"
+  add_foreign_key "review_links", "reviews", column: "to"
+  add_foreign_key "reviews", "posts"
+  add_foreign_key "reviews", "users"
 end

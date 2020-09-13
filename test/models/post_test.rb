@@ -33,18 +33,18 @@ class PostTest < ActiveSupport::TestCase
     assert @post.save
   end
 
-  test 'default state should be accepting' do
-    assert @post.state == 'accepting'
+  test 'default state should be open' do
+    assert @post.state == 'open'
   end
 
   test 'post should be resolved' do
-    @post.resolve
-    assert @post.resolved?
+    @post.close
+    assert @post.closed?
   end
 
   test 'post state should be changed' do
-    @post.change_state 'voting'
-    assert @post.state == 'voting'
+    @post.change_state 'closed'
+    assert @post.state == 'closed'
   end
 
   test 'body should be present' do
