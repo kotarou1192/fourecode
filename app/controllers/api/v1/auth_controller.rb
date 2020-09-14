@@ -10,6 +10,10 @@ module Api
       def create
         return update if user_tokens[:master]
 
+        if params[:value].nil? || user_params[:email].nil? || user_params[:password].nil?
+          return error_response json: generate_response(FAILED, nil)
+        end
+
         user = User.find_by(email: user_params[:email].downcase)
         unless user
           return render status: 400, json: generate_response(FAILED, nil)
