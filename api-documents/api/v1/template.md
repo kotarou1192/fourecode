@@ -1,8 +1,8 @@
 # METHOD /api/v1/endpoint
 ## request parameters
-| name | type | importance | description | 
-| ---- | ---- | ---------- | ----------- | 
-|      |      |            |             | 
+| name | type | importance | description | validation | 
+| ---- | ---- | ---------- | ----------- | ---------- | 
+|      |      |            |             |            | 
 ## example requests
 ```json
 
