@@ -1,13 +1,13 @@
 # POST /api/v1/users
 ## request parameters
 
-| name                       | type   | importance      | description                                                                         | 
-| -------------------------- | ------ | --------------- | ----------------------------------------------------------------------------------- | 
-| name                       | string | required        | サービス上で一意な名前。<br>a-z A-Z 0-9 -で構成すること。長さは最大30まで           | 
-| nickname                   | string | optional        | 重複が許されるニックネーム。<br>a-z A-Z 0-9 -で構成すること。長さは最大30まで。空白、もしくは無ければnameと同じになる。       | 
-| email                      | string | required        | メールアドレス。重複は許されない。255文字まで。                                     | 
-| password                   | string | required        | パスワード。最小6文字。                                                             | 
-| explanation                | string | optional        | 自己紹介。255文字まで。                                                             | 
+| name                       | type   | importance      | description                                                                         | validation | 
+| -------------------------- | ------ | --------------- | ----------------------------------------------------------------------------------- | --- |
+| name                       | string | required        | サービス上で一意な名前。           | a-z A-Z 0-9 -で構成すること。長さは最大30まで |
+| nickname                   | string | optional        | 重複が許されるニックネーム。       | a-z A-Z 0-9 -で構成すること。長さは最大30まで。空白、もしくは無ければnameと同じになる。|
+| email                      | string | required        | メールアドレス。                                     | 重複は許されない。255文字まで。 |
+| password                   | string | required        | パスワード。                                                             | 最小6文字。 |
+| explanation                | string | optional        | 自己紹介。                                                             | 255文字まで。 |
 ## example requests
 ```json
 {

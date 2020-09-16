@@ -1,13 +1,13 @@
 # PUT /api/v1/users/{name}
 ## request parameters
 
-| name                       | type   | importance      | description                                                                         | 
-| -------------------------- | ------ | --------------- | ----------------------------------------------------------------------------------- | 
-| name                       | string | optional        | サービス上で一意な名前。<br>a-z A-Z 0-9 -で構成すること。長さは最大30まで           | 
-| nickname                   | string | optional        | 重複が許されるニックネーム。<br>a-z A-Z 0-9 -で構成すること。長さは最大30まで       | 
-| explanation                | string | optional        | 自己紹介。255文字まで。                                                             | 
-| image.base64_encoded_image | string | optional        | アイコン画像。画像サイズは120*120。Base64でエンコードして文字列化して送信すること。 | 
-| token.onetime              | string | required        | ワンタイムトークン。必須。                                                           |  
+| name                       | type   | importance      | description                                                                         | validation |
+| -------------------------- | ------ | --------------- | ----------------------------------------------------------------------------------- | --- |
+| name                       | string | optional        | サービス上で一意な名前。| a-z A-Z 0-9 -で構成すること。長さは最大30まで           | 
+| nickname                   | string | optional        | 重複が許されるニックネーム。| a-z A-Z 0-9 -で構成すること。長さは最大30まで       | 
+| explanation                | string | optional        | 自己紹介。 | 255文字まで。                                                             | 
+| image.base64_encoded_image | string | optional        | アイコン画像。 | 画像サイズは120*120に自動リサイズされる。Base64でエンコードして文字列化して送信すること。 | 
+| token.onetime              | string | required        | ワンタイムトークン。 |                                                           |  
 
 ## example requests
 ```json
