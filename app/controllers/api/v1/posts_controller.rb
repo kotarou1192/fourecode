@@ -17,13 +17,13 @@ class Api::V1::PostsController < ApplicationController
     post = Post.find(post_id)
 
     unless @session_user.id == post.user_id || @session_user.admin?
-      message = 'this post is not yours. if you edit this post, you should be a admin'
+      message = 'this post is not yours. if you want to edit this post, you should be a admin'
       return render status: 400, json: generate_response(FAILED, message)
                                          .merge(error_messages(key: 'authority', message: message))
     end
 
     if post.destroy
-      return render json: generate_response(SUCCESS, 'post has been created successfully')
+      return render json: generate_response(SUCCESS, 'the post has been deleted successfully')
     end
 
     render_error_message(post)
