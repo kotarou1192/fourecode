@@ -66,7 +66,7 @@ class Api::V1::PasswordResetsController < ApplicationController
     end
 
     user.send_password_reset_email
-    render json: generate_response(SUCCESS, message: 'passowrd reset mail has been sent')
+    render json: generate_response(SUCCESS, message: 'password reset mail has been sent')
   end
 
   private
