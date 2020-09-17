@@ -22,7 +22,7 @@ module UserHelper
     if onetime_session&.available?
       @session_user = onetime_session.user
     elsif onetime_session && !onetime_session.available?
-      message = 'onetime token is unavailable'
+      message = 'onetime token is too old'
       error_response json: generate_response(OLD_TOKEN, message: message)
                              .merge(error_messages(key: 'token', message: message))
     end
