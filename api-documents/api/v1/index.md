@@ -3,6 +3,8 @@
 リクエストの結果がSUCCESSの場合：　status=200  
 その他の場合は特に記載がない場合についてstatus=400で帰ってきます。
 
+成功時、bodyの中身にあるstatusにはSUCCESSが、それ以外はFAILEDが入ります。
+
 ### WebAPIs
 - [users](./users/index.md)
 - [auth](./auth/index.md)

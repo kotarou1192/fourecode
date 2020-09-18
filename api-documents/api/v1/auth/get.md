@@ -43,8 +43,7 @@
     ]
 }
 ```
-返ってくる可能性のあるerrorsのkeyとmessagesは以下。  
-特に記載がない場合statusはFAILED
+## errors: key & messages
 ### バリデーションエラー以外
 #### token
 - property onetime of token is empty

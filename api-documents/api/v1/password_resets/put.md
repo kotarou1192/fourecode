@@ -39,8 +39,7 @@
     ]
 }
 ```
-返ってくる可能性のあるerrorsのkeyとmessagesは以下。  
-特に記載がない場合statusはFAILED
+## errors: key & messages
 ### バリデーションエラー
 #### password
 - is too short (minimum is 6 characters)

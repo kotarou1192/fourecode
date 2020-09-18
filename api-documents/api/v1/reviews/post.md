@@ -39,8 +39,7 @@
     ]
 }
 ```
-返ってくる可能性のあるerrorsのkeyとmessagesは以下。  
-特に記載がない場合statusはFAILED
+## errors: key & messages
 ### バリデーションエラー
 #### body
 - is too long (maximum is 5000 characters)

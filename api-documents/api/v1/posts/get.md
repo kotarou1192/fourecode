@@ -46,8 +46,7 @@
     ]
 }
 ```
-返ってくる可能性のあるerrorsのkeyとmessagesは以下。  
-特に記載がない場合statusはFAILED
+## errors: key & messages
 ### エラー
 #### id
 - not found

@@ -58,7 +58,7 @@
     ]
 }
 ```
-返ってくる可能性のあるerrorsのkeyとmessagesは以下。
+## errors: key & messages
 ### バリデーションエラー時
 #### name
 - can't be blank
