@@ -59,5 +59,4 @@
 
 #### admin  
 - you are not admin
-  - status: ERROR
   - adminではないのに人のパラメーターを編集しようとした場合。  

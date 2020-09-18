@@ -98,7 +98,6 @@
 - you are not logged in
   - ログインしていない場合。
 
-#### admin  
-status: ERROR
+#### admin
 - you are not admin
   - adminではないのに人のパラメーターを編集しようとした場合。  

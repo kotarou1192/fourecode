@@ -38,7 +38,7 @@
 ### FAILED
 ```json
 {
-    "status": "ERROR",
+    "status": "FAILED",
     "body": {
         "message": "too many keywords"
     },
