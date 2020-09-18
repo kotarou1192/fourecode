@@ -45,5 +45,4 @@
   - パラメーターtokenがない、または、DBに存在しないonetime token
 #### token
 - onetime token is too old
-  - status: OLD_TOKEN
   - ワンタイムトークンの有効期限が切れている場合

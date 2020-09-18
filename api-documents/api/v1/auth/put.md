@@ -49,7 +49,6 @@
 - property master of token is empty
   - パラメーター(master token)がない
 - master token is too old
-  - status: OLD_TOKEN
   - マスタートークンが古い
 #### login
 - you are not logged in

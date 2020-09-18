@@ -41,7 +41,6 @@
   - トークンが不正だった（DBに存在しないTokenなど）
 #### token
 - onetime token is too old
-  - status: OLD_TOKEN
   - OnetimeTokenが古かった
 #### id
 - not found

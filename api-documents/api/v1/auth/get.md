@@ -50,7 +50,6 @@
 - property onetime of token is empty
   - パラメーターが足りない
 - onetime token is too old
-  - status: OLD_TOKEN
   - ワンタイムトークンの有効期限が切れている場合
 #### login
 - you are not logged in

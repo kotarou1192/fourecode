@@ -89,7 +89,6 @@
 
 #### token 
 - onetime token is too old
-  - status: OLD_TOKEN
   - ワンタイムトークンが古い。
 - property onetime of token is empty
   - ワンタイムトークンが空またはない。

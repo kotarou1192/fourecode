@@ -33,7 +33,7 @@
 ### FAILED
 ```json
 {
-    "status": "OLD_TOKEN",
+    "status": "FAILED",
     "body": null,
     "errors": [
         {
@@ -55,6 +55,5 @@
   - 存在しないPostIDを指定したとき
 #### token
 - onetime token is too old
-  - status: OLD_TOKEN
   - tokenが古い
   

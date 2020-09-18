@@ -78,7 +78,6 @@
 - onetime token is empty
   - ワインタイムトークンがパラメーターにない
 - onetime token is too old
-  - status: OLD_TOKEN
   - ワンタイムトークンの期限が切れている
 #### login
 - you are not logged in
