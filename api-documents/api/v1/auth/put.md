@@ -30,9 +30,7 @@
 ```json
 {
     "status": "FAILED",
-    "body": {
-        "message": "you are not logged in"
-    },
+    "body": null,
     "errors": [
         {
             "key": "login",

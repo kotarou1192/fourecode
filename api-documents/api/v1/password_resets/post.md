@@ -25,9 +25,7 @@
 ```json
 {
     "status": "FAILED",
-    "body": {
-        "message": "the email address does not exist"
-    },
+    "body": null,
     "errors": [
         {
             "key": "email",

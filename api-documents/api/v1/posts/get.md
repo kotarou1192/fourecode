@@ -34,9 +34,7 @@
 ```json
 {
     "status": "OLD_TOKEN",
-    "body": {
-        "message": "onetime token is too old"
-    },
+    "body": null,
     "errors": [
         {
             "key": "token",

@@ -27,9 +27,7 @@
 ```json
 {
     "status": "FAILED",
-    "body": {
-        "message": "invalid reset link"
-    },
+    "body": null,
     "errors": [
         {
             "key": "invalid_link",

@@ -21,9 +21,7 @@
 ```json
 {
     "status": "FAILED",
-    "body": {
-        "message": "you are not login"
-    },
+    "body": null,
     "errors": [
         {
             "key": "login",

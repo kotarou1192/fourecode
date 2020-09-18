@@ -39,9 +39,7 @@
 ```json
 {
     "status": "FAILED",
-    "body": {
-        "message": "too many keywords"
-    },
+    "body": null,
     "errors": [
         {
             "key": "keyword",
