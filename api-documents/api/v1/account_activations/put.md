@@ -27,7 +27,7 @@
 特に記載なしの場合のレスポンスステータス: 400  
 ```json
 {
-    "status": "ERROR",
+    "status": "FAILED",
     "message": "invalid activation link",
     "errors": [
         {
