@@ -1,5 +1,5 @@
 
-# METHOD /api/v1/endpoint
+# GET /api/v1/search/users
 ## request parameters
 | name | type | importance | description | validation | 
 | ---- | ---- | ---------- | ----------- | ---------- | 
