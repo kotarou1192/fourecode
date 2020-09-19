@@ -41,7 +41,7 @@ module Api
 
         unless selected_user&.activated?
           response_json = generate_response(FAILED, nil)
-          response_json.merge(error_messages(key: 'id', message: 'a user is not found by the id'))
+          response_json.merge!(error_messages(key: 'name', message: 'the user is not found'))
           return error_response(status: 404, json: response_json)
         end
 

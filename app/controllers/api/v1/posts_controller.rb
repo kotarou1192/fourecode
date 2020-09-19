@@ -15,15 +15,20 @@ class Api::V1::PostsController < ApplicationController
     end
 
     post = Post.find(post_id)
+    unless post
+      message = 'not found'
+      return render status: 404, json: generate_response(FAILED, message: message)
+                                         .merge(error_messages(key: 'id', message: message))
+    end
 
     unless @session_user.id == post.user_id || @session_user.admin?
-      message = 'this post is not yours. if you edit this post, you should be a admin'
+      message = 'this post is not yours. if you want to edit this post, you should be a admin'
       return render status: 400, json: generate_response(FAILED, message)
                                          .merge(error_messages(key: 'authority', message: message))
     end
 
     if post.destroy
-      return render json: generate_response(SUCCESS, 'post has been created successfully')
+      return render json: generate_response(SUCCESS, 'the post has been deleted successfully')
     end
 
     render_error_message(post)
@@ -34,9 +39,14 @@ class Api::V1::PostsController < ApplicationController
     return unless @user
 
     post = Post.find(post_id)
+    unless post
+      message = 'not found'
+      return render status: 404, json: generate_response(FAILED, message: message)
+                                         .merge(error_messages(key: 'id', message: message))
+    end
 
     unless @user.id == post.user_id || @user.admin?
-      message = 'this post is not yours. if you edit this post, you should be a admin'
+      message = 'this post is not yours. if you want to edit this post, you should be a admin'
       return render status: 400, json: generate_response(FAILED, message)
                                          .merge(error_messages(key: 'authority', message: message))
     end
@@ -50,14 +60,14 @@ class Api::V1::PostsController < ApplicationController
 
   # show the post
   def show
-    selected_post = Post.find(post_id)
-    unless selected_post
+    post = Post.find(post_id)
+    unless post
       message = 'not found'
       return render status: 404, json: generate_response(FAILED, message: message)
                                          .merge(error_messages(key: 'id', message: message))
     end
 
-    render json: generate_response(SUCCESS, post_info(selected_post))
+    render json: generate_response(SUCCESS, post_info(post))
   end
 
   # create a post

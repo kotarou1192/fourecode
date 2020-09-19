@@ -1,37 +1,20 @@
-#### post /api/v1/posts/id/reviews
-
-必要なparameterの例
-
-```json
-{
-   "token": {
-             "onetime": "your onetime token here"
-   },
-   "value": {
-       "body": "your review body here"
-   }
-}
-```
-
-成功すればbodyのstatusにSUCCESSが、それ以外はFAILEDが入る。詳細はErrorsのKey（別途ドキュメント）を参照のこと。
-
-#### get /api/v1/posts/id/reviews
-#### get /api/v1/users/name/reviews
-
-required params
+# GET /api/v1/posts/{id}/reviews
+# GET /api/v1/users/{name}/reviews
+上記2つとも同じようなレスポンスを返す
+## request parameters
+| name | type | importance | description | validation | 
+| ---- | ---- | ---------- | ----------- | ---------- | 
+| page_number | integer | optional | 表示するページ(指定しなければ1) |            | 
+| max_content | integer | optional | 1ページに表示する数(指定しなければ50) |            | 
+## example requests
 ```json
 {
   "page_number": "表示するレビューのページ番号. 何も指定しない場合は1",
   "max_content": "1ページに表示するレビュー+レスポンスの数. 何も指定しない場合は50"
 }
 ```
-
-URLのidは投稿のID  
-URLのnameはユーザーの名前  
-log-inしていなくても見れる。
-
-##### レスポンスの中身の例
-
+## example responses
+### SUCCESS
 ```json
 {
     "status": "SUCCESS",
@@ -90,3 +73,6 @@ log-inしていなくても見れる。
     }
 }
 ```
+
+指定したユーザーが存在しない場合と指定したポストが存在しない場合は、レビューが1つもない場合と区別されません。  
+よって、その場合はreviewsには空配列が入ります。
