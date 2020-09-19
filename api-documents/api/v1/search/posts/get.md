@@ -1,4 +1,4 @@
-# GET /api/v1/
+# GET /api/v1/search/posts
 ## request parameters
 | name | type | importance | description | validation | 
 | ---- | ---- | ---------- | ----------- | ---------- | 
