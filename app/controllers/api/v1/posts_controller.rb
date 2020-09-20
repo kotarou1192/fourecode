@@ -2,6 +2,7 @@
 
 class Api::V1::PostsController < ApplicationController
   include UserHelper
+  include ErrorKeys
 
   before_action :get_user, only: %i[create update]
   before_action :get_session_owner, only: %i[show destroy]
@@ -10,20 +11,20 @@ class Api::V1::PostsController < ApplicationController
   def destroy
     unless @session_user
       message = 'you are not login'
-      key = 'login'
+      key = ErrorKeys::LOGIN
       return error_response(key: key, message: message)
     end
 
     post = Post.find(post_id)
     unless post
       message = 'not found'
-      key = 'id'
+      key = ErrorKeys::ID
       return error_response(key: key, message: message, status: 404)
     end
 
     unless @session_user.id == post.user_id || @session_user.admin?
       message = 'this post is not yours. if you want to edit this post, you should be a admin'
-      key = 'authority'
+      key = ErrorKeys::AUTHORITY
       return error_response(key: key, message: message)
     end
 
@@ -41,13 +42,13 @@ class Api::V1::PostsController < ApplicationController
     post = Post.find(post_id)
     unless post
       message = 'not found'
-      key = 'id'
+      key = ErrorKeys::ID
       return error_response(key: key, message: message, status: 404)
     end
 
     unless @user.id == post.user_id || @user.admin?
       message = 'this post is not yours. if you want to edit this post, you should be a admin'
-      key = 'authority'
+      key = ErrorKeys::AUTHORITY
       return error_response(key: key, message: message)
     end
 
@@ -63,7 +64,7 @@ class Api::V1::PostsController < ApplicationController
     post = Post.find(post_id)
     unless post
       message = 'not found'
-      key = 'id'
+      key = ErrorKeys::ID
       return error_response(key: key, message: message, status: 404)
     end
 

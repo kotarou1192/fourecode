@@ -5,6 +5,7 @@ module Api
     class AuthController < ApplicationController
       include ErrorMessageHelper
       include ResponseStatus
+      include ErrorKeys
 
       # log-in
       def create
@@ -34,7 +35,7 @@ module Api
       def index
         if user_token_from_get_params.nil?
           message = 'property onetime of token is empty'
-          key = 'token'
+          key = ErrorKeys::TOKEN
           return error_response(key: key, message: message)
         end
 
@@ -66,7 +67,7 @@ module Api
       def update
         if user_tokens[:master].nil?
           message = 'property master of token is empty'
-          key = 'token'
+          key = ErrorKeys::TOKEN
           return error_response(key: key, message: message)
         end
 

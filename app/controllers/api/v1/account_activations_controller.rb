@@ -4,6 +4,7 @@ class Api::V1::AccountActivationsController < ApplicationController
   include ErrorMessageHelper
   include ResponseHelper
   include ResponseStatus
+  include ErrorKeys
 
   def update
     user = User.find_by(email: user_params[:email])
@@ -13,7 +14,7 @@ class Api::V1::AccountActivationsController < ApplicationController
       render json: generate_response(SUCCESS, message: 'activated')
     else
       message = 'invalid activation link'
-      key = 'link'
+      key = ErrorKeys::LINK
       error_response(key: key, message: message)
     end
   end

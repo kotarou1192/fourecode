@@ -5,6 +5,7 @@ class SearchController < ApplicationController
   include ResponseHelper
   include LoginHelper
   include ResponseStatus
+  include ErrorKeys
 
   MAXIMUM_CONTENTS_COUNT = 1000
 
@@ -50,7 +51,7 @@ class SearchController < ApplicationController
     get_keywords
     if @keywords.size > @max_keywords_count
       message = 'too many keywords'
-      key = 'keyword'
+      key = ErrorKeys::KEYWORD
       error_response(key: key, message: message)
       return true
     end

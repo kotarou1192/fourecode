@@ -45,3 +45,6 @@
 - not found
   - status: 404
   - 存在しないPostIDを指定したとき
+#### authority
+- this post is not yours. if you want to edit this post, you should be a admin
+  - 他人のポストを削除しようとした時、かつ、Adminでなかった場合（権限不足）

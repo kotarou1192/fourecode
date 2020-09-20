@@ -6,6 +6,7 @@ module Api
       include LoginHelper
       include ErrorMessageHelper
       include ResponseStatus
+      include ErrorKeys
 
       def create
         @user = User.new(user_params)
@@ -41,7 +42,7 @@ module Api
       def update
         unless user_tokens[:onetime]
           message = 'property onetime of token is empty'
-          key = 'token'
+          key = ErrorKeys::TOKEN
           return error_response(key: key, message: message)
         end
 
@@ -79,7 +80,7 @@ module Api
       def destroy
         if user_token_from_get_params.nil?
           message = 'property onetime of token is empty'
-          key = 'token'
+          key = ErrorKeys::TOKEN
           return error_response(key: key, message: message)
         end
 

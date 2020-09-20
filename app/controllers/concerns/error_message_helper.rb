@@ -4,6 +4,7 @@ module ErrorMessageHelper
   extend ActiveSupport::Concern
   include ResponseStatus
   include ResponseHelper
+  include ErrorKeys
 
   TOKEN_TYPES = %w[onetime master].freeze
 
@@ -51,6 +52,6 @@ module ErrorMessageHelper
 
     message = "#{type} token is too old"
     error_response_base json: generate_response(ResponseStatus::FAILED, message: message)
-                                .merge(error_messages(key: 'token', message: message))
+                                .merge(error_messages(key: ErrorKeys::TOKEN, message: message))
   end
 end

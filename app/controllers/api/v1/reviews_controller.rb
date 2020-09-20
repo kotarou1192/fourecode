@@ -3,6 +3,7 @@
 # レビューに関する操作を集めたコントローラー
 class Api::V1::ReviewsController < ApplicationController
   include UserHelper
+  include ErrorKeys
 
   MAXIMUM_CONTENTS_COUNT = 1000
   DEFAULT_CONTENTS_COUNT = 50
@@ -17,13 +18,13 @@ class Api::V1::ReviewsController < ApplicationController
     post = Post.find(post_id)
     unless post
       message = 'the post is not found'
-      key = 'post_id'
+      key = ErrorKeys::ID
       return error_response(key: key, message: message)
     end
 
     if post.closed?
       message = 'the post has been closed'
-      key = 'closed'
+      key = ErrorKeys::CLOSED
       return error_response(key: key, message: message)
     end
 

@@ -4,6 +4,7 @@ class Api::V1::PasswordResetsController < ApplicationController
   include ErrorMessageHelper
   include ResponseStatus
   include ResponseHelper
+  include ErrorKeys
 
   # PUTで呼び出す
   # パラメーターの内容
@@ -17,19 +18,19 @@ class Api::V1::PasswordResetsController < ApplicationController
     session = PasswordResetSession.find_by(token_digest: PasswordResetSession.digest(token))
     unless session
       message = 'invalid reset link'
-      key = 'link'
+      key = ErrorKeys::LINK
       return error_response(key: key, message: message)
     end
 
     unless session.available?
       message = 'the link is too old'
-      key = 'link'
+      key = ErrorKeys::LINK
       return error_response(key: key, message: message)
     end
 
     unless user_params[:password]
       message = 'password does not exit'
-      key = 'password'
+      key = ErrorKeys::PASSWORD
       return error_response(key: key, message: message)
     end
 
@@ -55,12 +56,12 @@ class Api::V1::PasswordResetsController < ApplicationController
     user = User.find_by(email: user_params[:email])
     unless user
       message = 'the email address does not exist'
-      key = 'email'
+      key = ErrorKeys::EMAIL
       return error_response(key: key, message: message)
     end
     unless user.activated?
       message = 'account is not activated'
-      key = 'account'
+      key = ErrorKeys::ACCOUNT
       return error_response(key: key, message: message)
     end
 

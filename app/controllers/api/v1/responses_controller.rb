@@ -14,7 +14,7 @@ class Api::V1::ResponsesController < ApplicationController
 
     unless review
       message = 'the review is not found'
-      key = 'id'
+      key = ErrorKeys::ID
       return error_response(key: key, message: message)
     end
 
@@ -22,7 +22,7 @@ class Api::V1::ResponsesController < ApplicationController
 
     if post.closed?
       message = 'the post has been closed'
-      key = 'closed'
+      key = ErrorKeys::CLOSED
       return error_response(key: key, message: message)
     end
 
@@ -43,7 +43,7 @@ class Api::V1::ResponsesController < ApplicationController
   def response?(review)
     if ReviewLink.response?(review)
       message = 'can not response to a response'
-      key = 'response'
+      key = ErrorKeys::RESPONSE
       error_response(key: key, message: message)
       return true
     end

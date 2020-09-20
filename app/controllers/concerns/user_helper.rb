@@ -7,6 +7,7 @@ module UserHelper
   include ResponseHelper
   include LoginHelper
   include ErrorMessageHelper
+  include ErrorKeys
 
   SUCCESS = ResponseStatus::SUCCESS
   FAILED = ResponseStatus::FAILED
@@ -30,14 +31,14 @@ module UserHelper
   def get_user
     unless user_token_from_nest_params[:onetime]
       message = 'onetime token is empty'
-      key = 'token'
+      key = ErrorKeys::TOKEN
       return error_response(key: key, message: message)
     end
 
     onetime_session = login?(user_token_from_nest_params[:onetime])
     unless onetime_session
       message = 'you are not logged in'
-      key = 'login'
+      key = ErrorKeys::LOGIN
       return error_response(key: key, message: message)
     end
     return old_token_response unless onetime_session.available?
