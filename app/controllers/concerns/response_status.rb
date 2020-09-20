@@ -5,6 +5,4 @@ module ResponseStatus
 
   SUCCESS = 'SUCCESS'
   FAILED = 'FAILED'
-  ERROR = 'ERROR'
-  OLD_TOKEN = 'OLD_TOKEN'
 end

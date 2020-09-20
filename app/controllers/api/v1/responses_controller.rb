@@ -14,16 +14,16 @@ class Api::V1::ResponsesController < ApplicationController
 
     unless review
       message = 'the review is not found'
-      return error_response json: generate_response(FAILED, message)
-                                    .merge(error_messages(key: 'review_id', message: message))
+      key = ErrorKeys::ID
+      return error_response(key: key, message: message)
     end
 
     post = review.post
 
     if post.closed?
       message = 'the post has been closed'
-      return error_response json: generate_response(FAILED, message)
-                                    .merge(error_messages(key: 'closed', message: message))
+      key = ErrorKeys::CLOSED
+      return error_response(key: key, message: message)
     end
 
     return if response?(review)
@@ -43,8 +43,8 @@ class Api::V1::ResponsesController < ApplicationController
   def response?(review)
     if ReviewLink.response?(review)
       message = 'can not response to a response'
-      error_response json: generate_response(FAILED, message)
-                             .merge(error_messages(key: 'response', message: message))
+      key = ErrorKeys::RESPONSE
+      error_response(key: key, message: message)
       return true
     end
     false

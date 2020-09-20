@@ -57,7 +57,7 @@ post_idは実のところ今は何でもよいです（使っていない）が�
 #### login
 - you are not logged in
   - DB上にそのワンタイムトークンが存在しない
-#### review_id
+#### id
 - the review is not found
   - 存在しないreview_idを指定したとき
 #### closed

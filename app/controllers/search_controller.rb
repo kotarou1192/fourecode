@@ -5,6 +5,7 @@ class SearchController < ApplicationController
   include ResponseHelper
   include LoginHelper
   include ResponseStatus
+  include ErrorKeys
 
   MAXIMUM_CONTENTS_COUNT = 1000
 
@@ -49,8 +50,9 @@ class SearchController < ApplicationController
   def too_many_keywords?
     get_keywords
     if @keywords.size > @max_keywords_count
-      render status: 400, json: generate_response(ERROR, message: 'too many keywords')
-                                  .merge(error_messages(key: 'keyword', message: 'too many keywords'))
+      message = 'too many keywords'
+      key = ErrorKeys::KEYWORD
+      error_response(key: key, message: message)
       return true
     end
 

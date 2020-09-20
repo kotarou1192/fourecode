@@ -55,7 +55,7 @@
 #### login
 - you are not logged in
   - DB上にそのワンタイムトークンが存在しない
-#### post_id
+#### id
 - the post is not found
   - 存在しないpost_idを指定したとき
 #### closed

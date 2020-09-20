@@ -47,10 +47,9 @@
 - can't be blank
   - パスワードが空
 ### エラー
-#### invalid_link
+#### link
 - invalid reset link
   - DB上にリセットセッションが存在しない
-#### old_link
 - the link is too old
   - セッションが古い（制限時間を超えた）
 #### password
