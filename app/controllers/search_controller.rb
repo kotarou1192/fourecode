@@ -49,7 +49,7 @@ class SearchController < ApplicationController
   def too_many_keywords?
     get_keywords
     if @keywords.size > @max_keywords_count
-      render status: 400, json: generate_response(ERROR, message: 'too many keywords')
+      render status: 400, json: generate_response(FAILED, message: 'too many keywords')
                                   .merge(error_messages(key: 'keyword', message: 'too many keywords'))
       return true
     end

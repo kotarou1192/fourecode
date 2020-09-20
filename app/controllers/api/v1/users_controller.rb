@@ -20,7 +20,7 @@ module Api
           render json: generate_response(SUCCESS, message: 'activation mail has been sent')
         else
           error_messages = generate_error_messages_from_errors(@user.errors.messages)
-          render error_response json: generate_response(ERROR, nil)
+          render error_response json: generate_response(FAILED, nil)
                                         .merge(error_messages(error_messages: error_messages))
         end
       end
@@ -31,9 +31,7 @@ module Api
           if onetime_session && token_available?(user_token_from_get_params)
             @session_user = User.find_by(id: onetime_session.user_id)
           elsif !token_available?(user_token_from_get_params)
-            message = 'onetime token is unavailable'
-            return error_response json: generate_response(OLD_TOKEN, message: message)
-                                          .merge(error_messages(key: 'token', message: message))
+            return old_token_response
           end
         end
 
@@ -62,11 +60,7 @@ module Api
                                         .merge(error_messages(key: 'login', message: message))
         end
 
-        unless token_available?(user_tokens[:onetime])
-          message = 'onetime token is too old'
-          return error_response json: generate_response(OLD_TOKEN, message: message)
-                                        .merge(error_messages(key: 'token', message: message))
-        end
+        return old_token_response unless token_available?(user_tokens[:onetime])
 
         selected_user = User.find_by(name: user_name)
         unless selected_user
@@ -79,7 +73,7 @@ module Api
 
         unless session_user.admin? || session_user == selected_user
           message = 'you are not admin'
-          return error_response json: generate_response(ERROR, message: message)
+          return error_response json: generate_response(FAILED, message: message)
                                         .merge(error_messages(key: 'admin', message: message))
         end
 
@@ -107,9 +101,7 @@ module Api
         end
 
         unless token_available?(user_token_from_get_params)
-          message = 'onetime token is too old'
-          return error_response json: generate_response(OLD_TOKEN, message: message)
-                                        .merge(error_messages(key: 'token', message: message))
+          return old_token_response
         end
 
         session_user = onetime_session.user
@@ -122,7 +114,7 @@ module Api
 
         unless session_user.admin? || session_user == selected_user
           message = 'you are not admin'
-          return error_response json: generate_response(ERROR, message: message)
+          return error_response json: generate_response(FAILED, message: message)
                                         .merge(error_messages(key: 'admin', message: message))
         end
 

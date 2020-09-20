@@ -48,9 +48,7 @@ module Api
         user = User.find_by(id: onetime_session.user_id)
         unless onetime_session.available?
           onetime_session.destroy!
-          message = 'onetime token is too old'
-          return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                             .merge(error_messages(key: 'token', message: message))
+          return old_token_response
         end
 
         MasterSession.destroy_old_sessions(user)
@@ -82,9 +80,7 @@ module Api
         user = User.find_by(id: master_session.user_id)
         unless master_session.available?
           master_session.destroy!
-          message = 'master token is too old'
-          return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                             .merge(error_messages(key: 'token', message: message))
+          return old_token_response(type: 'master')
         end
 
         MasterSession.destroy_old_sessions(user)
@@ -111,9 +107,7 @@ module Api
 
         unless onetime_session.available?
           onetime_session.destroy!
-          message = 'onetime token is too old'
-          return render status: 400, json: generate_response(OLD_TOKEN, message: message)
-                                             .merge(error_messages(key: 'token', message: message))
+          return old_token_response
         end
 
         user = User.find_by(id: onetime_session.user_id)
