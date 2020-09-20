@@ -19,7 +19,15 @@ module ErrorMessageHelper
 
   def error_messages(key: nil, message: nil, code: nil, error_messages: [])
     errors = error_messages
-    errors.push(key: key, messages: [message], code: code) if key
+    is_exists = false
+    errors.each do |error|
+      next unless error[:key] == key
+
+      error[:messages].push message
+      is_exists = true
+      break
+    end
+    errors.push(key: key, messages: [message], code: code) if key && !is_exists
     { errors: errors }
   end
 
