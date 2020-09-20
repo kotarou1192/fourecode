@@ -63,7 +63,7 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
     put '/api/v1/password_resets', params: { token: token, value: { password: new_password } }
 
     body = JSON.parse(response.body)
-    assert response.status == 400 && body['errors'][0]['key'] == 'old_link'
+    assert response.status == 400 && body['errors'][0]['key'] == 'link'
   end
 
   test 'empty password should be rejected' do
@@ -82,7 +82,7 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
     put '/api/v1/password_resets', params: { token: 'hoge_token', value: { password: new_password } }
 
     body = JSON.parse(response.body)
-    assert response.status == 400 && body['errors'][0]['key'] == 'invalid_link'
+    assert response.status == 400 && body['errors'][0]['key'] == 'link'
   end
 
   test 'short password should be rejected' do

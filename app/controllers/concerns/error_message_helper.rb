@@ -3,6 +3,8 @@
 module ErrorMessageHelper
   extend ActiveSupport::Concern
   include ResponseStatus
+  include ResponseHelper
+
   TOKEN_TYPES = %w[onetime master].freeze
 
   def generate_error_messages_from_errors(messages)
@@ -21,21 +23,26 @@ module ErrorMessageHelper
     { errors: errors }
   end
 
-  def error_response(status: 400, json:)
+  def error_response_base(status: 400, json:)
     render status: status, json: json
+  end
+
+  def error_response(key:, message:, status: 400)
+    error_response_base status: status, json: generate_response(ResponseStatus::FAILED, nil)
+                                                .merge(error_messages(key: key, message: message))
   end
 
   def failed_to_create(model)
     messages = generate_error_messages_from_errors(model.errors.messages)
-    error_response json: generate_response(ResponseStatus::FAILED, nil)
-                           .merge(error_messages(error_messages: messages))
+    error_response_base json: generate_response(ResponseStatus::FAILED, nil)
+                                .merge(error_messages(error_messages: messages))
   end
 
   def old_token_response(type: 'onetime')
     raise ArgumentError, "undefined type #{type}. type should be #{TOKEN_TYPES.join(' or ')}" unless TOKEN_TYPES.any? type
 
     message = "#{type} token is too old"
-    error_response json: generate_response(ResponseStatus::FAILED, message: message)
-                           .merge(error_messages(key: 'token', message: message))
+    error_response_base json: generate_response(ResponseStatus::FAILED, message: message)
+                                .merge(error_messages(key: 'token', message: message))
   end
 end

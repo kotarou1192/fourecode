@@ -17,14 +17,14 @@ class Api::V1::ReviewsController < ApplicationController
     post = Post.find(post_id)
     unless post
       message = 'the post is not found'
-      return error_response json: generate_response(FAILED, message)
-                                    .merge(error_messages(key: 'post_id', message: message))
+      key = 'post_id'
+      return error_response(key: key, message: message)
     end
 
     if post.closed?
       message = 'the post has been closed'
-      return error_response json: generate_response(FAILED, message)
-                                    .merge(error_messages(key: 'closed', message: message))
+      key = 'closed'
+      return error_response(key: key, message: message)
     end
 
     review = Review.generate_record(body: body, post: post, user: @user)

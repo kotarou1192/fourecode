@@ -13,8 +13,8 @@ class Api::V1::AccountActivationsController < ApplicationController
       render json: generate_response(SUCCESS, message: 'activated')
     else
       message = 'invalid activation link'
-      error_response json: generate_response(FAILED, nil)
-                             .merge(error_messages(key: 'link', message: message))
+      key = 'link'
+      error_response(key: key, message: message)
     end
   end
 

@@ -9,19 +9,11 @@ module Api
 
       def create
         @user = User.new(user_params)
-        unless @user.valid?
-          error_messages = generate_error_messages_from_errors(@user.errors.messages)
-          return error_response json: generate_response(FAILED, nil)
-                                        .merge(error_messages(error_messages: error_messages))
-        end
-
         if @user.save
           @user.send_activation_email
           render json: generate_response(SUCCESS, message: 'activation mail has been sent')
         else
-          error_messages = generate_error_messages_from_errors(@user.errors.messages)
-          render error_response json: generate_response(FAILED, nil)
-                                        .merge(error_messages(error_messages: error_messages))
+          failed_to_create @user
         end
       end
 
@@ -38,9 +30,9 @@ module Api
         selected_user = User.find_by(name: user_name)
 
         unless selected_user&.activated?
-          response_json = generate_response(FAILED, nil)
-          response_json.merge!(error_messages(key: 'name', message: 'the user is not found'))
-          return error_response(status: 404, json: response_json)
+          message = 'the user is not found'
+          key = 'name'
+          return error_response(key: key, message: message, status: 404)
         end
 
         render json: generate_response(SUCCESS, user_info(selected_user))
@@ -49,15 +41,15 @@ module Api
       def update
         unless user_tokens[:onetime]
           message = 'property onetime of token is empty'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'token', message: message))
+          key = 'token'
+          return error_response(key: key, message: message)
         end
 
         onetime_session = login?(user_tokens[:onetime])
         unless onetime_session
           message = 'you are not logged in'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'login', message: message))
+          key = 'login'
+          return error_response(key: key, message: message)
         end
 
         return old_token_response unless token_available?(user_tokens[:onetime])
@@ -65,39 +57,37 @@ module Api
         selected_user = User.find_by(name: user_name)
         unless selected_user
           message = 'invalid user name'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'name', message: message))
+          key = 'name'
+          return error_response(key: key, message: message)
         end
 
         session_user = onetime_session.user
 
         unless session_user.admin? || session_user == selected_user
           message = 'you are not admin'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'admin', message: message))
+          key = 'admin'
+          return error_response(key: key, message: message)
         end
 
         if update_selected_user(selected_user)
           render json: generate_response(SUCCESS, message: 'user parameters are updated successfully')
         else
-          error_messages = generate_error_messages_from_errors(selected_user.errors.messages)
-          error_response json: generate_response(FAILED, nil)
-                                 .merge(error_messages(error_messages: error_messages))
+          failed_to_create selected_user
         end
       end
 
       def destroy
         if user_token_from_get_params.nil?
           message = 'property onetime of token is empty'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'token', message: message))
+          key = 'token'
+          return error_response(key: key, message: message)
         end
 
         onetime_session = login?(user_token_from_get_params)
         unless onetime_session
           message = 'you are not logged in'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'login', message: message))
+          key = 'login'
+          return error_response(key: key, message: message)
         end
 
         unless token_available?(user_token_from_get_params)
@@ -108,22 +98,20 @@ module Api
         selected_user = User.find_by(name: user_name)
         unless selected_user
           message = 'invalid user name'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'name', message: message))
+          key = 'name'
+          return error_response(key: key, message: message)
         end
 
         unless session_user.admin? || session_user == selected_user
           message = 'you are not admin'
-          return error_response json: generate_response(FAILED, message: message)
-                                        .merge(error_messages(key: 'admin', message: message))
+          key = 'admin'
+          return error_response(key: key, message: message)
         end
 
         if selected_user.destroy
           render json: generate_response(SUCCESS, message: 'user is deleted successfully')
         else
-          error_messages = generate_error_messages_from_errors(selected_user.errors.messages)
-          error_response json: generate_response(FAILED, message: selected_user.errors.messages)
-                                 .merge(error_messages(error_messages: error_messages))
+          failed_to_create selected_user
         end
       end
 

@@ -29,15 +29,16 @@ module UserHelper
   # ユーザーをインスタンス変数に代入する関数
   def get_user
     unless user_token_from_nest_params[:onetime]
-      return error_response json: generate_response(FAILED, nil)
-                                    .merge(error_messages(key: 'token', message: 'onetime token is empty'))
+      message = 'onetime token is empty'
+      key = 'token'
+      return error_response(key: key, message: message)
     end
 
     onetime_session = login?(user_token_from_nest_params[:onetime])
     unless onetime_session
       message = 'you are not logged in'
-      return error_response json: generate_response(FAILED, message: message)
-                                    .merge(error_messages(key: 'login', message: message))
+      key = 'login'
+      return error_response(key: key, message: message)
     end
     return old_token_response unless onetime_session.available?
 
