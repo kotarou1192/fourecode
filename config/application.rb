@@ -28,8 +28,8 @@ module Fourecode
 
     config.active_record.schema_format = :sql
 
-    # Settings in config/environments/* take precedence over those specified here.
-    # Application configuration can go into files in config/initializers
+    # Settings in server_config/environments/* take precedence over those specified here.
+    # Application configuration can go into files in server_config/initializers
     # -- all .rb files in that directory are automatically loaded after loading
     # the framework and any gems in your application.
 
@@ -37,6 +37,7 @@ module Fourecode
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+    config.hosts << '4ecode.com'
     config.middleware.insert_before 0, Rack::Cors do
       allow do
         origins '*'
