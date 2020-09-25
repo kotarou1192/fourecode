@@ -48,7 +48,7 @@ set :rails_env, 'production'
 #  }
 #
 set :ssh_options, {
-  user: 'rails',
+  user: "#{ENV['SERVER_USER']}",
   keys: ["#{ENV['FOURECODE_PRODUCTION_SSH_KEY']}"],
   auth_methods: %w('publickey')
 }
