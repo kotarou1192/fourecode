@@ -35,8 +35,6 @@
 /config/puma.rb
 /config/environments/development.rb
 /config/environments/production.rb
-/config/deploy.rb
-/config/deploy/*
 /config/config/*
 nohup.out
 memo.json
