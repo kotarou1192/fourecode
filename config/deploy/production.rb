@@ -65,14 +65,6 @@ set :ssh_options, {
 #     # password: "please use keys"
 #   }
 
-namespace :rake do
-  desc 'Run a task on a remote server.'
-  # run like: cap staging rake:invoke task=yoour:rake:take:name
-  task :invoke do
-    run "#{fetch :rbenv_prefix} bundle exec rails db:drop_view"
-    run "#{fetch :rbenv_prefix} bundle exec rails db:create_view"
-  end
-end
 # ==================
 # puma
 set :puma_daemonize, true

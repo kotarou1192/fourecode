@@ -93,3 +93,4 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "${FINGERPRINTS}"
+      - run: bundle exec cap production utils:regenerate_view
