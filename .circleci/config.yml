@@ -24,7 +24,7 @@ jobs:
       - checkout
 
       # restore bundle cache
-      - restore_chache:
+      - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "Gemfile.lock" }}
             - v1-dependencies
