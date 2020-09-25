@@ -1,52 +1,15 @@
-# Ruby CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
 version: 2.1
+orbs:
+  ruby: circleci/ruby@0.1.2 
+
 jobs:
   build:
     docker:
-      # check https://circleci.com/docs/ja/2.0/circleci-images/#postgresql
       - image: circleci/ruby:2.7.1
-        environment:
-          BUNDLER_VERSION: 2.1.4
-          RAILS_ENV: 'test'
-
-      - image: circleci/postgres:9.6.9
-        environment:
-          POSTGRES_USER: fourecode
-          POSTGRES_HOST_AUTH_METHOD: trust
-          POSTGRES_DB: fourecode_test
-
-      working_directory: ~/fourecode
-
-      steps:
-        - checkout
-
-        # restore bundle cache
-        - restore_chache:
-            keys:
-              - v1-dependencies-{{ checksum "Gemfile.lock" }}
-              - v1-dependencies
-        # run bundle install
-        - run:
-            name: install dependencies
-            command: |
-              gem install bundler -v 2.1.4
-              bundle install --jobs=4 --retry=3 -path vendor/bundle
-        # save bundle cache
-        - save_chache:
-            key: v1-dependencies-{{ checksum "Gemfile.lock" }}
-            paths:
-              - vendor/bundle
-        - run:
-            name: wait runnning db
-            command: dockerize -wait tcp://127.0.0.1:5432 -timeout 120s
-        - run: bundle exec rake db:create
-        - run: bundle exec rake db:schema:load
-
-        # run minitest
-        - run:
-            name: run tests
-            command: bundle exec rails test
-
+    executor: ruby/default
+    steps:
+      - checkout
+      - run:
+          name: Which bundler?
+          command: bundle -v
+      - ruby/bundle-install
