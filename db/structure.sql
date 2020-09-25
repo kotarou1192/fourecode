@@ -1,7 +1,7 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'EUC_JP';
+SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
@@ -10,8 +10,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 SET default_tablespace = '';
-
-SET default_table_access_method = heap;
 
 --
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
@@ -55,6 +53,107 @@ CREATE SEQUENCE public.asked_users_id_seq
 --
 
 ALTER SEQUENCE public.asked_users_id_seq OWNED BY public.asked_users.id;
+
+
+--
+-- Name: posts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.posts (
+    id bigint NOT NULL,
+    title character varying,
+    bestanswer_reward integer,
+    source_url character varying,
+    state character varying DEFAULT 'open'::character varying,
+    body text,
+    code text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    user_id character varying
+);
+
+
+--
+-- Name: review_links; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.review_links (
+    id bigint NOT NULL,
+    "from" integer,
+    "to" integer,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: reviews; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.reviews (
+    id bigint NOT NULL,
+    body text,
+    thrown_coins integer DEFAULT 0,
+    user_id character varying,
+    post_id bigint,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    "primary" boolean
+);
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    id character varying(36) NOT NULL,
+    name character varying,
+    email character varying,
+    password_digest character varying,
+    nickname character varying,
+    admin boolean DEFAULT false,
+    activation_digest character varying,
+    activated boolean,
+    activated_at timestamp without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    icon character varying,
+    explanation character varying,
+    coins integer
+);
+
+
+--
+-- Name: join_reviews; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.join_reviews AS
+ SELECT posts.id AS post_id,
+    review.id AS review_id,
+    review.body AS review_body,
+    review.created_at AS review_created_at,
+    review.thrown_coins AS review_thrown_coins,
+    review.user_id AS reviewer_id,
+    reviewer.name AS reviewer_name,
+    reviewer.nickname AS reviewer_nickname,
+    reviewer.icon AS reviewer_icon,
+    response.id AS response_id,
+    response.body AS response_body,
+    response.created_at AS response_created_at,
+    response.thrown_coins AS response_thrown_coins,
+    response.user_id AS responder_id,
+    responder.name AS responder_name,
+    responder.nickname AS responder_nickname,
+    responder.icon AS responder_icon
+   FROM (((((public.posts
+     LEFT JOIN public.reviews review ON ((review.post_id = posts.id)))
+     LEFT JOIN public.users reviewer ON (((reviewer.id)::text = (review.user_id)::text)))
+     LEFT JOIN public.review_links ON ((review.id = review_links."from")))
+     LEFT JOIN public.reviews response ON ((response.id = review_links."to")))
+     LEFT JOIN public.users responder ON (((responder.id)::text = (response.user_id)::text)))
+  WHERE (review."primary" = true)
+  ORDER BY review.created_at, response.created_at;
 
 
 --
@@ -155,24 +254,6 @@ ALTER SEQUENCE public.password_reset_sessions_id_seq OWNED BY public.password_re
 
 
 --
--- Name: posts; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.posts (
-    id bigint NOT NULL,
-    title character varying,
-    bestanswer_reward integer,
-    source_url character varying,
-    state character varying DEFAULT 'open'::character varying,
-    body text,
-    code text,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL,
-    user_id character varying
-);
-
-
---
 -- Name: posts_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -226,19 +307,6 @@ ALTER SEQUENCE public.review_coin_transactions_id_seq OWNED BY public.review_coi
 
 
 --
--- Name: review_links; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.review_links (
-    id bigint NOT NULL,
-    "from" integer,
-    "to" integer,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
-);
-
-
---
 -- Name: review_links_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -255,22 +323,6 @@ CREATE SEQUENCE public.review_links_id_seq
 --
 
 ALTER SEQUENCE public.review_links_id_seq OWNED BY public.review_links.id;
-
-
---
--- Name: reviews; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.reviews (
-    id bigint NOT NULL,
-    body text,
-    thrown_coins integer DEFAULT 0,
-    user_id character varying,
-    post_id bigint,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL,
-    "primary" boolean
-);
 
 
 --
@@ -302,57 +354,66 @@ CREATE TABLE public.schema_migrations (
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.users (
-    id character varying(36) NOT NULL,
-    name character varying,
-    email character varying,
-    password_digest character varying,
-    nickname character varying,
-    admin boolean DEFAULT false,
-    activation_digest character varying,
-    activated boolean,
-    activated_at timestamp without time zone,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL,
-    icon character varying,
-    explanation character varying,
-    coins integer
-);
-
-
---
 -- Name: show_reviews; Type: VIEW; Schema: public; Owner: -
 --
 
 CREATE VIEW public.show_reviews AS
- SELECT posts.id AS post_id,
-    review.id AS review_id,
-    review.body AS review_body,
-    review.created_at AS review_created_at,
-    review.thrown_coins AS review_thrown_coins,
-    review.user_id AS reviewer_id,
-    reviewer.name AS reviewer_name,
-    reviewer.nickname AS reviewer_nickname,
-    reviewer.icon AS reviewer_icon,
-    response.id AS response_id,
-    response.body AS response_body,
-    response.created_at AS response_created_at,
-    response.thrown_coins AS response_thrown_coins,
-    response.user_id AS responder_id,
-    responder.name AS responder_name,
-    responder.nickname AS responder_nickname,
-    responder.icon AS responder_icon
-   FROM (((((public.posts
-     LEFT JOIN public.reviews review ON ((review.post_id = posts.id)))
-     LEFT JOIN public.users reviewer ON (((reviewer.id)::text = (review.user_id)::text)))
-     LEFT JOIN public.review_links ON ((review.id = review_links."from")))
-     LEFT JOIN public.reviews response ON ((response.id = review_links."to")))
-     LEFT JOIN public.users responder ON (((responder.id)::text = (response.user_id)::text)))
-  WHERE (review."primary" = true)
-  ORDER BY review.created_at, response.created_at;
+ SELECT result.post_id,
+    result.review_id,
+    result.review_body,
+    result.review_created_at,
+    result.review_thrown_coins,
+    result.reviewer_id,
+    result.reviewer_name,
+    result.reviewer_nickname,
+    result.reviewer_icon,
+    result.response_id,
+    result.response_body,
+    result.response_created_at,
+    result.response_thrown_coins,
+    result.responder_id,
+    result.responder_name,
+    result.responder_nickname,
+    result.responder_icon
+   FROM ( SELECT join_reviews.post_id,
+            join_reviews.review_id,
+            join_reviews.review_body,
+            join_reviews.review_created_at,
+            join_reviews.review_thrown_coins,
+            join_reviews.reviewer_id,
+            join_reviews.reviewer_name,
+            join_reviews.reviewer_nickname,
+            join_reviews.reviewer_icon,
+            join_reviews.response_id,
+            join_reviews.response_body,
+            join_reviews.response_created_at,
+            join_reviews.response_thrown_coins,
+            join_reviews.responder_id,
+            join_reviews.responder_name,
+            join_reviews.responder_nickname,
+            join_reviews.responder_icon
+           FROM public.join_reviews
+        UNION
+         SELECT join_reviews.post_id,
+            join_reviews.review_id,
+            join_reviews.review_body,
+            join_reviews.review_created_at,
+            join_reviews.review_thrown_coins,
+            join_reviews.reviewer_id,
+            join_reviews.reviewer_name,
+            join_reviews.reviewer_nickname,
+            join_reviews.reviewer_icon,
+            NULL::bigint AS response_id,
+            NULL::text AS response_body,
+            NULL::timestamp without time zone AS response_created_at,
+            NULL::integer AS response_thrown_coins,
+            NULL::character varying AS responder_id,
+            NULL::character varying AS responder_name,
+            NULL::character varying AS responder_nickname,
+            NULL::character varying AS responder_icon
+           FROM public.join_reviews
+          WHERE (join_reviews.response_id IS NOT NULL)) result
+  ORDER BY result.review_created_at, result.response_created_at NULLS FIRST;
 
 
 --
