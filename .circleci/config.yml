@@ -16,6 +16,13 @@ workflows:
           filters:
             branches:
               only: master
+      - deploy-dev:
+          requires:
+            - test
+          filters:
+            branches:
+              only: develop
+
 jobs:
   bundle_install:
     docker:
@@ -97,3 +104,30 @@ jobs:
           fingerprints:
             - "${FINGERPRINTS}"
       - run: bundle exec cap production utils:regenerate_view
+      - run: bundle exec cap production puma:restart
+
+  deploy-dev:
+    docker:
+      # check https://circleci.com/docs/ja/2.0/circleci-images/#postgresql
+      - image: circleci/ruby:2.7.1
+        environment:
+          - BUNDLER_VERSION: 2.1.4
+          - RAILS_ENV: 'development'
+
+    working_directory: ~/fourecode
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies
+      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      # run capistrano deploy
+      - run:
+          name: deploy
+          command: bundle exec cap development deploy
+      - add_ssh_keys:
+          fingerprints:
+            - "${FINGERPRINTS}"
+      - run: bundle exec cap development utils:regenerate_view
