@@ -10,6 +10,7 @@ server '4ecode.com', user: 'rails', roles: %w[app db]
 # server 'ls-8837dc160830cb173282460d26b0eb313e7e2ff4.cbprlpeszvir.ap-northeast-1.rds.amazonaws.com', user: 'dbmasteruser', roles: %w[db]
 
 set :rails_env, 'production'
+set :deploy_to, "/var/www/html/fourecode"
 
 # role-based syntax
 # ==================
@@ -48,8 +49,8 @@ set :rails_env, 'production'
 #  }
 #
 set :ssh_options, {
-  user: "#{ENV['SERVER_USER']}",
-  keys: ["#{ENV['FOURECODE_PRODUCTION_SSH_KEY']}"],
+  user: "#{ENV['SERVER_USER'] || 'rails'}",
+  keys: ["#{ENV['FOURECODE_PRODUCTION_SSH_KEY'] || '/Users/azufa/.ssh/ubuntu-rails'}"],
   auth_methods: %w('publickey')
 }
 # The server-based syntax can be used to override options:

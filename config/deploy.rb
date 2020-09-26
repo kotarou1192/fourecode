@@ -9,7 +9,6 @@ set :repo_url, "git@github.com:kotarou1192/fourecode.git"
 
 # Default deploy_to directory is /var/www/my_app_name
 # set :deploy_to, "/var/www/my_app_name"
-set :deploy_to, "/var/www/html/fourecode"
 
 # Default value for :format is :airbrussh.
 # set :format, :airbrussh
@@ -24,7 +23,7 @@ set :deploy_to, "/var/www/html/fourecode"
 # Default value for :linked_files is []
 
 # 共有する設定ファイル
-append :linked_files, 'config/database.yml', 'config/credentials/production.key', 'config/credentials/production.yml.enc'
+append :linked_files, 'config/environments/production.rb', 'config/database.yml', 'config/credentials/production.key', 'config/credentials/production.yml.enc'
 
 # Default value for linked_dirs is []
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets"
@@ -40,7 +39,7 @@ append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets"
 
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
-set :bundle_gemfile, '/var/www/html/fourecode/Gemfile'
+set :bundle_gemfile, "#{fetch :deploy_to}/Gemfile"
 set :rbenv_type, :user
 set :rbenv_custom_path, '/home/rails/.rbenv'
 set :rbenv_ruby, File.read('.ruby-version').strip
@@ -55,3 +54,25 @@ set :bundle_jobs, 1
 
 # pumaコマンドをbundle execで実行
 append :rbenv_map_bins, 'puma', 'pumactl'
+
+namespace :deploy do
+  desc 'Create Database'
+  task :db_create do
+    on roles(:db) do |host|
+      with rails_env: fetch(:rails_env) do
+        within current_path do
+          execute :bundle, :exec, :rake, 'db:create'
+        end
+      end
+    end
+  end
+end
+
+namespace :deploy do
+  task :restart_puma do
+    invoke 'puma:stop'
+    invoke! 'puma:start'
+  end
+end
+
+after 'puma:restart', 'deploy:restart_puma'
