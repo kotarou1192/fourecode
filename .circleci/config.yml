@@ -13,6 +13,9 @@ workflows:
       - deploy:
           requires:
             - test
+          filters:
+            branches:
+              only: master
 jobs:
   bundle_install:
     docker:
