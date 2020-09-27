@@ -2,7 +2,7 @@
 
 class UserMailer < ApplicationMailer
   PROTOCOL = 'https'
-  DOMAIN = 'takashiii-hq.com'
+  DOMAIN = '4ecode.com'
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
   #

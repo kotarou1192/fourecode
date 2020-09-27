@@ -1,0 +1,133 @@
+# Ruby CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-ruby/ for more details
+#
+version: 2.1
+workflows:
+  test_build:
+    jobs:
+      - bundle_install
+      - test:
+          requires:
+            - bundle_install
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+      - deploy-dev:
+          requires:
+            - test
+          filters:
+            branches:
+              only: develop
+
+jobs:
+  bundle_install:
+    docker:
+      - image: circleci/ruby:2.7.1
+        environment:
+          - BUNDLER_VERSION: 2.1.4
+          - RAILS_ENV: 'development'
+    working_directory: ~/fourecode
+    steps:
+      - checkout
+      # restore bundle cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies
+      # run bundle install
+      - run:
+          name: install dependencies
+          command: |
+            gem install bundler -v 2.1.4
+            bundle install --jobs=4 --retry=3 --path vendor/bundle
+      # save bundle cache
+      - save_cache:
+          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+  test:
+    docker:
+      - image: circleci/ruby:2.7.1
+        environment:
+          - BUNDLER_VERSION: 2.1.4
+          - RAILS_ENV: 'test'
+      - image: circleci/postgres:9.6.9
+        environment:
+          - POSTGRES_USER: postgres
+          - POSTGRES_HOST_AUTH_METHOD: trust
+    working_directory: ~/fourecode
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies
+      - run: sudo apt update
+      - run: sudo apt install postgresql-client
+      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run:
+          name: rename database.yml.ci
+          command: mv config/database.yml.ci config/database.yml
+      - run: bundle exec rails db:create
+      - run: bundle exec rails db:structure:load
+      - run:
+          name: run tests
+          command: bundle exec rails test
+
+  deploy:
+    docker:
+      # check https://circleci.com/docs/ja/2.0/circleci-images/#postgresql
+      - image: circleci/ruby:2.7.1
+        environment:
+          - BUNDLER_VERSION: 2.1.4
+          - RAILS_ENV: 'development'
+
+    working_directory: ~/fourecode
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies
+      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      # run capistrano deploy
+      - run:
+          name: deploy
+          command: bundle exec rails deploy:upload
+      - add_ssh_keys:
+          fingerprints:
+            - "${FINGERPRINTS}"
+      - run: bundle exec cap production utils:regenerate_view
+      - run: bundle exec cap production puma:restart
+
+  deploy-dev:
+    docker:
+      # check https://circleci.com/docs/ja/2.0/circleci-images/#postgresql
+      - image: circleci/ruby:2.7.1
+        environment:
+          - BUNDLER_VERSION: 2.1.4
+          - RAILS_ENV: 'development'
+
+    working_directory: ~/fourecode
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies
+      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      # run capistrano deploy
+      - run:
+          name: deploy
+          command: bundle exec cap development deploy
+      - add_ssh_keys:
+          fingerprints:
+            - "${FINGERPRINTS}"
+      - run: bundle exec cap development utils:regenerate_view
