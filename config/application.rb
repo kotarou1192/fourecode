@@ -39,6 +39,7 @@ module Fourecode
     config.api_only = true
     config.hosts << 'api.4ecode.com'
     config.hosts << 'dev.api.4ecode.com'
+    config.hosts << 'feature.api.4ecode.com'
     config.middleware.insert_before 0, Rack::Cors do
       allow do
         origins '*'
