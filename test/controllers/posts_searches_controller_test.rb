@@ -16,14 +16,6 @@ class PostsSearchesControllerTest < ActionDispatch::IntegrationTest
     @post = @user.posts.create(title: 'test', body: 'test', code: 'test', source_url: 'test')
   end
 
-  def create_sessions
-    master_session = @user.master_session.create
-    onetime_session = master_session.onetime_session.new
-    onetime_session.user = @user
-    onetime_session.save
-    [master_session, onetime_session]
-  end
-
   # search posts test
   test 'should be found' do
     get '/api/v1/search/posts', params: { keyword: 't' }

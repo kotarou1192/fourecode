@@ -19,14 +19,6 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
     @res = @review.reply(body: 'reply', user: @user)
   end
 
-  def create_sessions
-    master_session = @user.master_session.create
-    onetime_session = master_session.onetime_session.new
-    onetime_session.user = @user
-    onetime_session.save
-    [master_session, onetime_session]
-  end
-
   def get_body
     @body = JSON.parse(response.body)
   end
