@@ -97,15 +97,6 @@ class Post < ApplicationRecord
     (Arel::Table.new :result)[:state].matches(post_status)
   end
 
-  # activeなPost（削除されていない）だけに絞り込みの場合は
-  # 引数にTrueを入れる
-  def self.active_post?(is_active = true)
-    if is_active
-      return (Arel::Table.new :result)[:discarded_at].eq nil
-    end
-    (Arel::Table.new :result)[:discarded_at].not_eq nil
-  end
-
   # 引数はユーザー名か空文字かnil
   def self.set_author(author)
     user = User.find_by(name: author)
