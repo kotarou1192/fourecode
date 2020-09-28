@@ -14,7 +14,7 @@ class User < ApplicationRecord
   validates :email, presence: true, length: { maximum: 255 },
             format: { with: VALID_EMAIL_REGEX },
             uniqueness: true
-  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
+  validates :password, presence: true, length: { minimum: 6 }, on: :create
   validates :explanation, presence: true, length: { maximum: 255 }, allow_nil: true
   validates :coins, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
@@ -133,6 +133,16 @@ class User < ApplicationRecord
     posts.destroy_all
     MasterSession.destroy_sessions(self)
     discard
+  end
+
+  def update_password(new_password)
+    self.password = new_password
+    if valid?(:create)
+      create_password_digest
+      save
+    else
+      false
+    end
   end
 
   private

@@ -21,13 +21,11 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test 'password should be present (nonblank)' do
-    @user.password = ' ' * 6
-    assert_not @user.valid?
+    assert_not @user.update_password(' ' * 6)
   end
 
   test 'password should have a minimum length' do
-    @user.password = 'a' * 5
-    assert_not @user.valid?
+    assert_not @user.update_password('a' * 5)
   end
 
   test 'id should be present' do
