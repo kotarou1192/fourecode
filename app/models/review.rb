@@ -9,6 +9,7 @@ class Review < ApplicationRecord
 
   belongs_to :post
   belongs_to :user
+  before_destroy :destroy_dependent_review_links
   has_many :review_coin_transactions, dependent: :destroy
 
   validates :body, presence: true, length: { maximum: BODY_MAX_CHARS }
@@ -60,5 +61,11 @@ class Review < ApplicationRecord
       return response
     end
     response
+  end
+
+  private
+
+  def destroy_dependent_review_links
+    ReviewLink.destroy_all_dependency(self)
   end
 end

@@ -56,4 +56,12 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
     assert @body['status'] == 'SUCCESS'
     assert @body['body']['total_contents_count'] == 2
   end
+
+  test 'deleted posts review should not be found' do
+    master, onetime = create_sessions
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+    get "/api/v1/users/#{@user.name}"
+    assert response.status == 404
+  end
 end

@@ -1,5 +1,4 @@
 class Post < ApplicationRecord
-  include Discard::Model
   DEFAULT_REWARD = 100
   DEFINED_STATES = %w[open closed].freeze
   MAX_REWARD = 500
@@ -19,9 +18,6 @@ class Post < ApplicationRecord
   has_many :asked_users, dependent: :destroy
   has_many :reviews, dependent: :destroy
   belongs_to :user
-
-  # deleteされていないPostのみを表示
-  default_scope { kept }
 
   def change_state(state)
     unless DEFINED_STATES.any?(state)
@@ -52,18 +48,17 @@ class Post < ApplicationRecord
     end
   end
 
-  def self.count_search_results(keywords, post_state, author, is_shown_active_only = true)
+  def self.count_search_results(keywords, post_state, author)
     Post.count_by_sql(Post.arel_table
                         .project('count(*)')
                         .from(join_keywords_results(keywords).as('result'))
                         .where(set_post_state(post_state)
-                                 .and(set_author(author))
-                                 .and(active_post? is_shown_active_only))
+                                 .and(set_author(author)))
                         .distinct('result.id')
                         .to_sql)
   end
 
-  def self.find_posts(keywords, post_state, author, page, max_content, is_shown_active_only = true)
+  def self.find_posts(keywords, post_state, author, page, max_content)
     Post.find_by_sql(Post.arel_table
                        .project('result.id', 'result.title',
                                 'result.body', 'result.code',
@@ -71,8 +66,7 @@ class Post < ApplicationRecord
                                 'result.user_id')
                        .from(join_keywords_results(keywords).as('result'))
                        .where(set_post_state(post_state)
-                                .and(set_author(author))
-                                .and(active_post? is_shown_active_only))
+                                .and(set_author(author)))
                        .group('result.id', 'result.title',
                               'result.body', 'result.code',
                               'result.state', 'result.bestanswer_reward',

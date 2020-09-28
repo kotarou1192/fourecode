@@ -130,7 +130,7 @@ class User < ApplicationRecord
   after_discard do
     update_random_name
     update_random_email
-    posts.discard_all
+    posts.destroy_all
     MasterSession.destroy_sessions(self)
     discard
   end

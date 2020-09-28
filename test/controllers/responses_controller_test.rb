@@ -16,6 +16,7 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
     @post = @user.posts.create(title: 'test', body: 'test', code: 'test', source_url: 'test')
     @review = Review.generate_record(body: 'review', user: @user, post: @post)
     @review.save
+    @master, @onetime = create_sessions
   end
 
   def get_body
@@ -52,6 +53,7 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
     assert @body['errors'].first['key'] == 'response'
   end
 
+  # reviewにレスポンスをしたときユーザーが消せなかったため、そのテスト
   test 'user should be deleted' do
     master, onetime = create_sessions
     text = 'awesome review'
