@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  include Discard::Model
   attr_accessor :activation_token, :password
   before_save :downcase_email
   before_create :create_activation_digest, :generate_uuid, :create_password_digest,
@@ -13,7 +14,7 @@ class User < ApplicationRecord
   validates :email, presence: true, length: { maximum: 255 },
             format: { with: VALID_EMAIL_REGEX },
             uniqueness: true
-  validates :password, presence: true, length: { minimum: 6 }
+  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
   validates :explanation, presence: true, length: { maximum: 255 }, allow_nil: true
   validates :coins, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
@@ -22,6 +23,9 @@ class User < ApplicationRecord
   has_many :posts, dependent: :destroy
   has_many :asked_users, dependent: :destroy
   has_one :password_reset_session, dependent: :destroy
+
+  # deleteされていないPostのみを表示
+  default_scope { kept }
 
   mount_uploader :icon, ImageUploader
 
@@ -73,13 +77,13 @@ class User < ApplicationRecord
     self.password_digest = User.digest(password)
   end
 
-  def self.find_users(keywords, page, max_content)
+  def self.find_users(keywords, page, max_content, is_shown_active_only = true)
     User.find_by_sql(User.arel_table
                        .project('result.name', 'result.nickname',
                                 'result.explanation', 'result.icon',
                                 'result.admin', 'result.activated')
                        .from(keywords_results_from_users(keywords).as('result'))
-                       .where(set_user_state(true))
+                       .where(set_user_state(true).and(active_user?(is_shown_active_only)))
                        .group('result.name', 'result.nickname',
                               'result.explanation', 'result.icon',
                               'result.admin', 'result.activated')
@@ -89,11 +93,11 @@ class User < ApplicationRecord
                        .to_sql)
   end
 
-  def self.count_search_results(keywords)
+  def self.count_search_results(keywords, is_shown_active_only = true)
     Post.count_by_sql(Post.arel_table
                         .project('count(*)')
                         .from(keywords_results_from_users(keywords).as('result'))
-                        .where(set_user_state(true))
+                        .where(set_user_state(true).and(active_user?(is_shown_active_only)))
                         .distinct('result.id')
                         .to_sql)
   end
@@ -122,7 +126,43 @@ class User < ApplicationRecord
     update!(coins: coins + amount)
   end
 
+  # 論理削除のコールバック
+  after_discard do
+    update_random_name
+    update_random_email
+    posts.discard_all
+    MasterSession.destroy_sessions(self)
+    discard
+  end
+
   private
+
+  # activeなUser（削除されていない）だけに絞り込みの場合は
+  # 引数にTrueを入れる
+  def self.active_user?(is_active = true)
+    if is_active
+      return (Arel::Table.new :result)[:discarded_at].eq nil
+    end
+    (Arel::Table.new :result)[:discarded_at].not_eq nil
+  end
+
+  # randomなUser名にアップデート
+  def update_random_name
+    1000.times do
+      random_name = SecureRandom.hex(15)
+      return if update!(name: random_name)
+    end
+    raise StandardError, 'failed to update user name randomly'
+  end
+
+  # randomなemailにアップデート
+  def update_random_email
+    1000.times do
+      random_name = SecureRandom.hex(15)
+      return if update!(email: "#{random_name}@4ecode.com")
+    end
+    raise StandardError, 'failed to update user email randomly'
+  end
 
   def self.keywords_results_from_users(keywords, index = 0)
     keyword = keywords[index]
