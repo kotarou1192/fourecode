@@ -52,4 +52,17 @@ class PostsSearchesControllerTest < ActionDispatch::IntegrationTest
 
     assert body['body']['hit_total'] == 10
   end
+
+  # other
+  test 'deleted users post should not be found' do
+    master, onetime = create_sessions
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+    get '/api/v1/search/posts', params: { keyword: '_' } # '_' is wildcard
+    body = JSON.parse(response.body)
+
+    body['body']['results'].each do |result|
+      assert_not result['author']['name'] == @user.name
+    end
+  end
 end

@@ -51,4 +51,15 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
     assert @body['status'] == 'FAILED'
     assert @body['errors'].first['key'] == 'response'
   end
+
+  test 'user should be deleted' do
+    master, onetime = create_sessions
+    text = 'awesome review'
+    post "/api/v1/posts/#{@post.id}/reviews/#{@review.id}", params: { value: { body: text }, token: { onetime: onetime.token } }
+    assert response.status == 200
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+    get "/api/v1/users/#{@user.name}"
+    assert response.status == 404
+  end
 end

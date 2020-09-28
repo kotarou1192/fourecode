@@ -49,6 +49,16 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     assert response.status == 400 && body['status'] == 'FAILED'
   end
 
+  test 'deleted user can not log-in' do
+    _master, onetime = create_sessions
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+
+    post '/api/v1/auth', params: { value: { email: @user.email, password: @user.password } }
+    assert_not MasterSession.find_by(user_id: @user.id)
+    assert_not OnetimeSession.find_by(user_id: @user.id)
+  end
+
   # get user info test
 
   test 'the user data should be got' do
@@ -111,6 +121,15 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     assert response.status == 400 && body['errors'][0]['key'] == 'token'
   end
 
+  test 'deleted user can not refresh own token' do
+    master, onetime = create_sessions
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+
+    put '/api/v1/auth', params: { token: { master: master.token } }
+    assert response.status == 400
+  end
+
   # logout test
 
   test 'user should be logout' do
@@ -143,5 +162,14 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     delete '/api/v1/auth', params: { token: 'hogefuga' }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'login'
+  end
+
+  test 'deleted user can not log-out' do
+    _master, onetime = create_sessions
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+
+    delete '/api/v1/auth', params: { token: { master: onetime.token } }
+    assert response.status == 400
   end
 end
