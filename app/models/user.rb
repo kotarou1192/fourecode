@@ -128,8 +128,10 @@ class User < ApplicationRecord
 
   # 論理削除のコールバック
   after_discard do
-    update_random_name
-    update_random_email
+    transaction do
+      update_random_name
+      update_random_email
+    end
     posts.destroy_all
     MasterSession.destroy_sessions(self)
     discard
@@ -160,7 +162,7 @@ class User < ApplicationRecord
   def update_random_name
     1000.times do
       random_name = SecureRandom.hex(15)
-      return if update!(name: random_name)
+      return if update(name: random_name)
     end
     raise StandardError, 'failed to update user name randomly'
   end
@@ -169,7 +171,7 @@ class User < ApplicationRecord
   def update_random_email
     1000.times do
       random_name = SecureRandom.hex(15)
-      return if update!(email: "#{random_name}@4ecode.com")
+      return if update(email: "#{random_name}@4ecode.com")
     end
     raise StandardError, 'failed to update user email randomly'
   end
