@@ -69,8 +69,7 @@ CREATE TABLE public.posts (
     code text,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    user_id character varying,
-    discarded_at timestamp without time zone
+    user_id character varying
 );
 
 
@@ -136,18 +135,42 @@ CREATE VIEW public.join_reviews AS
     review.body AS review_body,
     review.created_at AS review_created_at,
     review.thrown_coins AS review_thrown_coins,
-    review.user_id AS reviewer_id,
-    reviewer.name AS reviewer_name,
-    reviewer.nickname AS reviewer_nickname,
-    reviewer.icon AS reviewer_icon,
+        CASE
+            WHEN (reviewer.discarded_at IS NULL) THEN review.user_id
+            ELSE NULL::character varying
+        END AS reviewer_id,
+        CASE
+            WHEN (reviewer.discarded_at IS NULL) THEN reviewer.name
+            ELSE NULL::character varying
+        END AS reviewer_name,
+        CASE
+            WHEN (reviewer.discarded_at IS NULL) THEN reviewer.nickname
+            ELSE NULL::character varying
+        END AS reviewer_nickname,
+        CASE
+            WHEN (reviewer.discarded_at IS NULL) THEN reviewer.icon
+            ELSE NULL::character varying
+        END AS reviewer_icon,
     response.id AS response_id,
     response.body AS response_body,
     response.created_at AS response_created_at,
     response.thrown_coins AS response_thrown_coins,
-    response.user_id AS responder_id,
-    responder.name AS responder_name,
-    responder.nickname AS responder_nickname,
-    responder.icon AS responder_icon
+        CASE
+            WHEN (responder.discarded_at IS NULL) THEN response.user_id
+            ELSE NULL::character varying
+        END AS responder_id,
+        CASE
+            WHEN (responder.discarded_at IS NULL) THEN responder.name
+            ELSE NULL::character varying
+        END AS responder_name,
+        CASE
+            WHEN (responder.discarded_at IS NULL) THEN responder.nickname
+            ELSE NULL::character varying
+        END AS responder_nickname,
+        CASE
+            WHEN (responder.discarded_at IS NULL) THEN responder.icon
+            ELSE NULL::character varying
+        END AS responder_icon
    FROM (((((public.posts
      LEFT JOIN public.reviews review ON ((review.post_id = posts.id)))
      LEFT JOIN public.users reviewer ON (((reviewer.id)::text = (review.user_id)::text)))
@@ -591,13 +614,6 @@ CREATE INDEX index_posts_on_code ON public.posts USING btree (code);
 
 
 --
--- Name: index_posts_on_discarded_at; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_posts_on_discarded_at ON public.posts USING btree (discarded_at);
-
-
---
 -- Name: index_posts_on_title; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -759,6 +775,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200901123706'),
 ('20200902094116'),
 ('20200902133349'),
-('20200928045505');
+('20200928045505'),
+('20200929072258');
 
 
