@@ -99,8 +99,8 @@ class ShowReview < ApplicationRecord
       created_at: review_response_mix.review_created_at,
       thrown_coins: review_response_mix.review_thrown_coins,
       reviewer: {
-        name: review_response_mix.reviewer_name,
-        nickname: review_response_mix.reviewer_nickname,
+        name: review_response_mix.reviewer_name || 'deleted user',
+        nickname: review_response_mix.reviewer_nickname || 'deleted user',
         icon: icon_url(review_response_mix.reviewer_id, review_response_mix.reviewer_icon)
       }
     }
@@ -113,8 +113,8 @@ class ShowReview < ApplicationRecord
       created_at: review_response_mix.response_created_at,
       thrown_coins: review_response_mix.response_thrown_coins,
       responder: {
-        name: review_response_mix.responder_name,
-        nickname: review_response_mix.responder_nickname,
+        name: review_response_mix.responder_name || 'deleted user',
+        nickname: review_response_mix.responder_nickname || 'deleted user',
         icon: icon_url(review_response_mix.responder_id, review_response_mix.responder_icon)
       }
     }

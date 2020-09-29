@@ -4,9 +4,15 @@ namespace :db do
     ActiveRecord::Base.connection.execute <<-SQL
       create view join_reviews as
       select posts.id as post_id, review.id as review_id, review.body as review_body, review.created_at as review_created_at, review.thrown_coins as review_thrown_coins,
-      review.user_id as reviewer_id, reviewer.name as reviewer_name, reviewer.nickname as reviewer_nickname, reviewer.icon as reviewer_icon,
+      case when reviewer.discarded_at is NULL then review.user_id else NULL end as reviewer_id,
+      case when reviewer.discarded_at is NULL then reviewer.name else NULL end as reviewer_name,
+      case when reviewer.discarded_at is NULL then reviewer.nickname else NULL end as reviewer_nickname,
+      case when reviewer.discarded_at is NULL then reviewer.icon else NULL end as reviewer_icon,
       response.id as response_id, response.body as response_body, response.created_at as response_created_at, response.thrown_coins as response_thrown_coins,
-      response.user_id as responder_id, responder.name as responder_name, responder.nickname as responder_nickname, responder.icon as responder_icon
+      case when responder.discarded_at is NULL then response.user_id else NULL end as responder_id,
+      case when responder.discarded_at is NULL then responder.name else NULL end as responder_name,
+      case when responder.discarded_at is NULL then responder.nickname else NULL end as responder_nickname,
+      case when responder.discarded_at is NULL then responder.icon else NULL end as responder_icon
       from
       	posts
       left outer join

@@ -91,6 +91,8 @@ GEM
       mini_mime (>= 0.1.3)
     concurrent-ruby (1.1.7)
     crass (1.0.6)
+    discard (1.2.0)
+      activerecord (>= 4.2, < 7)
     ed25519 (1.2.4)
     erubi (1.9.0)
     ffi (1.13.1)
@@ -202,6 +204,7 @@ DEPENDENCIES
   capistrano-rbenv
   capistrano3-puma
   carrierwave
+  discard (~> 1.2)
   ed25519
   listen (~> 3.2)
   pg

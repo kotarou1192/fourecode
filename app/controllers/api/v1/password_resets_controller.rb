@@ -35,9 +35,7 @@ class Api::V1::PasswordResetsController < ApplicationController
     end
 
     user = session.user
-    user.password = user_params[:password]
-    user.create_password_digest
-    if user.save
+    if user.update_password(user_params[:password])
       session.destroy
       return render json: generate_response(SUCCESS, message: 'your password has been changed')
     end

@@ -69,7 +69,8 @@ CREATE TABLE public.posts (
     code text,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    user_id character varying
+    user_id character varying,
+    discarded_at timestamp without time zone
 );
 
 
@@ -120,7 +121,8 @@ CREATE TABLE public.users (
     updated_at timestamp(6) without time zone NOT NULL,
     icon character varying,
     explanation character varying,
-    coins integer
+    coins integer,
+    discarded_at timestamp without time zone
 );
 
 
@@ -589,6 +591,13 @@ CREATE INDEX index_posts_on_code ON public.posts USING btree (code);
 
 
 --
+-- Name: index_posts_on_discarded_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_posts_on_discarded_at ON public.posts USING btree (discarded_at);
+
+
+--
 -- Name: index_posts_on_title; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -607,6 +616,13 @@ CREATE INDEX index_review_coin_transactions_on_review_id ON public.review_coin_t
 --
 
 CREATE INDEX index_reviews_on_post_id ON public.reviews USING btree (post_id);
+
+
+--
+-- Name: index_users_on_discarded_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_users_on_discarded_at ON public.users USING btree (discarded_at);
 
 
 --
@@ -742,6 +758,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200901113634'),
 ('20200901123706'),
 ('20200902094116'),
-('20200902133349');
+('20200902133349'),
+('20200928045505');
 
 

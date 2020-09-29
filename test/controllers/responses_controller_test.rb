@@ -16,14 +16,7 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
     @post = @user.posts.create(title: 'test', body: 'test', code: 'test', source_url: 'test')
     @review = Review.generate_record(body: 'review', user: @user, post: @post)
     @review.save
-  end
-
-  def create_sessions
-    master_session = @user.master_session.create
-    onetime_session = master_session.onetime_session.new
-    onetime_session.user = @user
-    onetime_session.save
-    [master_session, onetime_session]
+    @master, @onetime = create_sessions
   end
 
   def get_body
@@ -58,5 +51,17 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
     get_body
     assert @body['status'] == 'FAILED'
     assert @body['errors'].first['key'] == 'response'
+  end
+
+  # reviewにレスポンスをしたときユーザーが消せなかったため、そのテスト
+  test 'user should be deleted' do
+    master, onetime = create_sessions
+    text = 'awesome review'
+    post "/api/v1/posts/#{@post.id}/reviews/#{@review.id}", params: { value: { body: text }, token: { onetime: onetime.token } }
+    assert response.status == 200
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+    get "/api/v1/users/#{@user.name}"
+    assert response.status == 404
   end
 end

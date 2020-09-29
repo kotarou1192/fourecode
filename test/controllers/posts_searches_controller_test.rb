@@ -16,14 +16,6 @@ class PostsSearchesControllerTest < ActionDispatch::IntegrationTest
     @post = @user.posts.create(title: 'test', body: 'test', code: 'test', source_url: 'test')
   end
 
-  def create_sessions
-    master_session = @user.master_session.create
-    onetime_session = master_session.onetime_session.new
-    onetime_session.user = @user
-    onetime_session.save
-    [master_session, onetime_session]
-  end
-
   # search posts test
   test 'should be found' do
     get '/api/v1/search/posts', params: { keyword: 't' }
@@ -59,5 +51,18 @@ class PostsSearchesControllerTest < ActionDispatch::IntegrationTest
     body = JSON.parse(response.body)
 
     assert body['body']['hit_total'] == 10
+  end
+
+  # other
+  test 'deleted users post should not be found' do
+    master, onetime = create_sessions
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+    get '/api/v1/search/posts', params: { keyword: '_' } # '_' is wildcard
+    body = JSON.parse(response.body)
+
+    body['body']['results'].each do |result|
+      assert_not result['author']['name'] == @user.name
+    end
   end
 end

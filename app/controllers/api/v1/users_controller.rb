@@ -109,7 +109,7 @@ module Api
           return error_response(key: key, message: message)
         end
 
-        if selected_user.destroy
+        if selected_user.discard
           render json: generate_response(SUCCESS, message: 'user is deleted successfully')
         else
           failed_to_create selected_user
