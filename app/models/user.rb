@@ -24,7 +24,7 @@ class User < ApplicationRecord
   has_many :asked_users, dependent: :destroy
   has_one :password_reset_session, dependent: :destroy
 
-  # deleteされていないPostのみを表示
+  # deleteされていないUserのみを表示
   default_scope { kept }
 
   mount_uploader :icon, ImageUploader
