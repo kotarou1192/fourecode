@@ -4,6 +4,7 @@ set :rails_env, 'production'
 set :branch, 'develop'
 
 set :deploy_to, "/var/www/html/fourecode-dev"
+set :bundle_gemfile, -> { release_path.join('Gemfile') }
 
 set :ssh_options, {
   user: "#{ENV['SERVER_USER'] || 'rails'}",
