@@ -20,6 +20,10 @@ set :repo_url, "git@github.com:kotarou1192/fourecode.git"
 # Default value for :pty is false
 # set :pty, true
 
+# ログを詳しく表示
+# set :format, :pretty
+# set :log_level, :debug
+
 # Default value for :linked_files is []
 
 # 共有する設定ファイル
@@ -39,7 +43,8 @@ append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets"
 
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
-set :bundle_gemfile, "#{fetch :deploy_to}/Gemfile"
+# set :bundle_gemfile, -> { release_path.join('Gemfile') }
+# set :bundle_path, -> { shared_path.join('.bundle') }
 set :rbenv_type, :user
 set :rbenv_custom_path, '/home/rails/.rbenv'
 set :rbenv_ruby, File.read('.ruby-version').strip
