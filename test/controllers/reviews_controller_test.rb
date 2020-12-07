@@ -19,14 +19,6 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
     @res = @review.reply(body: 'reply', user: @user)
   end
 
-  def create_sessions
-    master_session = @user.master_session.create
-    onetime_session = master_session.onetime_session.new
-    onetime_session.user = @user
-    onetime_session.save
-    [master_session, onetime_session]
-  end
-
   def get_body
     @body = JSON.parse(response.body)
   end
@@ -63,5 +55,13 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
     get_body
     assert @body['status'] == 'SUCCESS'
     assert @body['body']['total_contents_count'] == 2
+  end
+
+  test 'deleted posts review should not be found' do
+    master, onetime = create_sessions
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+    get "/api/v1/users/#{@user.name}"
+    assert response.status == 404
   end
 end

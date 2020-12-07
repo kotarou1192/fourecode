@@ -106,7 +106,6 @@ jobs:
           fingerprints:
             - "${FINGERPRINTS}"
       - run: bundle exec cap production utils:regenerate_view
-      - run: bundle exec cap production puma:restart
 
   deploy-dev:
     docker:

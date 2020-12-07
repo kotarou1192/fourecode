@@ -23,14 +23,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     @user2.activate
   end
 
-  def create_sessions
-    master_session = @user.master_session.create
-    onetime_session = master_session.onetime_session.new
-    onetime_session.user = @user
-    onetime_session.save
-    [master_session, onetime_session]
-  end
-
   # create user test
 
   test 'invalid name should be rejected' do
@@ -190,5 +182,13 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     master, onetime = create_sessions
     delete '/api/v1/users/hoge', params: { token: onetime.token }
     assert response.status == 200
+  end
+
+  test 'deleted user should not be found' do
+    master, onetime = create_sessions
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+    get "/api/v1/users/#{@user.name}"
+    assert response.status == 404
   end
 end

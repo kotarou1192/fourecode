@@ -14,14 +14,6 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     @user.activate
   end
 
-  def create_sessions
-    master_session = @user.master_session.create
-    onetime_session = master_session.onetime_session.new
-    onetime_session.user = @user
-    onetime_session.save
-    [master_session, onetime_session]
-  end
-
   # test to post
 
   test 'post should be created' do
@@ -196,5 +188,18 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     delete "/api/v1/posts/#{user_post.id}", params: { token: o.token }
     body = JSON.parse(response.body)
     assert body['status'] == 'FAILED'
+  end
+
+  # other
+  test 'deleted users post should not be found' do
+    master, onetime = create_sessions
+    user_post = @user.posts.create(title: 'test', body: 'test', code: 'code', source_url: 'test')
+    get "/api/v1/posts/#{user_post.id}", params: { token: onetime.token }
+    assert response.status == 200
+    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    assert response.status == 200
+    get "/api/v1/posts/#{user_post.id}"
+  rescue ActiveRecord::RecordNotFound
+    assert true
   end
 end
