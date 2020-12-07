@@ -3,6 +3,7 @@
 class UserMailer < ApplicationMailer
   PROTOCOL = 'https'
   DOMAIN = '4ecode.com'
+  SERVER_TYPE = ENV['SERVER_TYPE']
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
   #
@@ -15,7 +16,7 @@ class UserMailer < ApplicationMailer
       token: @user.activation_token,
       email: @user.email
     }
-    @url = url_with_params("#{PROTOCOL}://#{DOMAIN}/account/activate", body)
+    @url = url_with_params("#{PROTOCOL}://#{choose_subdomain}#{DOMAIN}/account/activate", body)
     mail to: @user.email
   end
 
@@ -23,6 +24,16 @@ class UserMailer < ApplicationMailer
     uri = URI.parse(url)
     uri.query = URI.encode_www_form(params.to_a)
     uri.to_s
+  end
+
+  # return subdomain if SERVER_TYPE is 'feature' of 'development'
+  def choose_subdomain
+    if SERVER_TYPE == 'feature'
+      return 'feature.'
+    elsif SERVER_TYPE == 'development'
+      return 'dev.'
+    end
+    ''
   end
 
   # Subject can be set in your I18n file at config/locales/en.yml

@@ -12,6 +12,7 @@ server '4ecode.com', user: 'rails', roles: %w[app db]
 set :rails_env, 'production'
 set :deploy_to, "/var/www/html/fourecode"
 set :bundle_gemfile, -> { release_path.join('Gemfile') }
+set :SERVER_TYPE, 'production'
 # role-based syntax
 # ==================
 
