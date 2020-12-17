@@ -4,14 +4,12 @@ class Post < ApplicationRecord
   MAX_REWARD = 500
   MIN_REWARD = 0
   BODY_MAX_CHARS = 10000
-  CODE_MAX_CHARS = 10000
   TITLE_MAX_CHARS = 100
   SOURCE_URL_MAX_CHARS = 140
 
   before_save :set_default_reward
   validates :title, presence: true, length: { maximum: TITLE_MAX_CHARS }
   validates :body, presence: true, length: { maximum: BODY_MAX_CHARS }
-  validates :code, presence: true, length: { maximum: CODE_MAX_CHARS }
   validates :bestanswer_reward, numericality: { greater_than_or_equal_to: MIN_REWARD, less_than_or_equal_to: MAX_REWARD }, allow_nil: true
   validates :source_url, presence: true, length: { maximum: SOURCE_URL_MAX_CHARS }, if: :url_exists?, allow_nil: true
 
@@ -61,14 +59,14 @@ class Post < ApplicationRecord
   def self.find_posts(keywords, post_state, author, page, max_content)
     Post.find_by_sql(Post.arel_table
                        .project('result.id', 'result.title',
-                                'result.body', 'result.code',
+                                'result.body',
                                 'result.state', 'result.bestanswer_reward',
                                 'result.user_id')
                        .from(join_keywords_results(keywords).as('result'))
                        .where(set_post_state(post_state)
                                 .and(set_author(author)))
                        .group('result.id', 'result.title',
-                              'result.body', 'result.code',
+                              'result.body',
                               'result.state', 'result.bestanswer_reward',
                               'result.user_id')
                        .order('count(*) desc, result.id desc') # ここに評価値みたいなのを入れるといいかもしれない
@@ -85,7 +83,6 @@ class Post < ApplicationRecord
     post = Post.arel_table
     po = post.project('*').from('posts')
            .where(post[:title].matches(keyword)
-                    .or(post[:code].matches(keyword))
                     .or(post[:body].matches(keyword)))
 
     return po if keywords.size - 1 <= index

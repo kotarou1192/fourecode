@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
 class Api::V1::PostsController < ApplicationController
-  include UserHelper
+  include LoginHelper
+  include ResponseStatus
+  include ResponseHelper
   include ErrorKeys
+  include ErrorMessageHelper
 
-  before_action :get_user, only: %i[create update]
-  before_action :get_session_owner, only: %i[show destroy]
+  before_action :authenticate, only: %i[create update show destroy]
 
   # destroy the post
   def destroy
-    unless @session_user
+    unless @user
       message = 'you are not login'
       key = ErrorKeys::LOGIN
       return error_response(key: key, message: message)
@@ -22,14 +24,14 @@ class Api::V1::PostsController < ApplicationController
       return error_response(key: key, message: message, status: 404)
     end
 
-    unless @session_user.id == post.user_id || @session_user.admin?
+    unless @user.id == post.user_id || @user.admin?
       message = 'this post is not yours. if you want to edit this post, you should be a admin'
       key = ErrorKeys::AUTHORITY
       return error_response(key: key, message: message)
     end
 
     if post.destroy
-      return render json: generate_response(SUCCESS, 'the post has been deleted successfully')
+      return render json: generate_response(ResponseStatus::SUCCESS, 'the post has been deleted successfully')
     end
 
     render_error_message(post)
@@ -53,7 +55,7 @@ class Api::V1::PostsController < ApplicationController
     end
 
     if post.update(update_params)
-      return render json: generate_response(SUCCESS, 'the post is updated successfully')
+      return render json: generate_response(ResponseStatus::SUCCESS, 'the post is updated successfully')
     end
 
     render_error_message(post)
@@ -68,7 +70,7 @@ class Api::V1::PostsController < ApplicationController
       return error_response(key: key, message: message, status: 404)
     end
 
-    render json: generate_response(SUCCESS, post_info(post))
+    render json: generate_response(ResponseStatus::SUCCESS, post_info(post))
   end
 
   # create a post
@@ -77,7 +79,7 @@ class Api::V1::PostsController < ApplicationController
 
     post = @user.posts.new(post_params)
     if post.save
-      return render json: generate_response(SUCCESS, 'post has been created successfully')
+      return render json: generate_response(ResponseStatus::SUCCESS, "post has been created successfully. post id is #{post.id}")
     end
 
     failed_to_create post
@@ -90,15 +92,14 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def post_info(post)
-    user = post.user
+    user = post.user || User.new_deleted
     {
       title: post.title,
       body: post.body,
-      code: post.code,
       state: post.state,
       bestanswer_reward: post.bestanswer_reward,
       source_url: post.source_url,
-      is_mine: @session_user ? user.id == @session_user.id : false,
+      is_mine: @user ? user.id == @user.id : false,
       posted_by: {
         name: user.name,
         nickname: user.nickname,
@@ -114,7 +115,7 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:value).permit(:body, :code, :source_url, :bestanswer_reward, :title)
+    params.require(:value).permit(:body, :title)
   end
 
   def update_params

@@ -23,16 +23,14 @@ class Api::V1::PostsSearchesController < SearchController
     ActiveRecord::Associations::Preloader.new.preload(posts, [:user])
     posts.map do |post|
       body_result = take_string(post.body, keywords.first)
-      code_result = take_string(post.code, keywords.first)
       {
         id: post.id,
         title: post.title,
         body: body_result,
-        code: code_result,
         status: post.state,
         reward: post.bestanswer_reward,
         author: {
-          name: post.user.name
+          name: post.user ? post.user.name : User.new_deleted.name
         }
       }
     end
