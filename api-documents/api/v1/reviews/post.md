@@ -2,14 +2,10 @@
 ## request parameters
 | name | type | importance | description | validation | 
 | ---- | ---- | ---------- | ----------- | ---------- | 
-| token.onetime | string | required |             |            | 
 | value.body | string | required |             | 5000文字まで | 
 ## example requests
 ```json
 {
-   "token": {
-             "onetime": "your onetime token here"
-   },
    "value": {
        "body": "your review body here"
    }
@@ -48,13 +44,8 @@
   - 空白文字のみか、そもそも文字がない場合
 ### エラー
 #### token
-- onetime token is empty
-  - ワインタイムトークンがパラメーターにない
-- onetime token is too old
-  - ワンタイムトークンの期限が切れている
-#### login
-- you are not logged in
-  - DB上にそのワンタイムトークンが存在しない
+- token is invalid
+  - トークンが古かったり不正だったりそもそもなかったり（ログインし直して）
 #### id
 - the post is not found
   - 存在しないpost_idを指定したとき

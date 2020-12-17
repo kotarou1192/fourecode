@@ -2,11 +2,9 @@
 ## request parameters
 | name | type | importance | description | validation | 
 | ---- | ---- | ---------- | ----------- | ---------- | 
-| token | string | required | onetime token |            | 
 ## example requests
 ```json
 {
-  "token": "onetime_token here"
 }
 ```
 ## example responses
@@ -35,12 +33,9 @@
 ```
 ## errors: key & messages
 ### エラー
-#### login
-- you are not login
-  - トークンが不正だった（DBに存在しないTokenなど）
 #### token
-- onetime token is too old
-  - OnetimeTokenが古かった
+- token is invalid
+  - トークンが古かったり不正だったりそもそもなかったり（ログインし直して）
 #### id
 - not found
   - status: 404

@@ -2,20 +2,13 @@
 ## request parameters
 | name | type | importance | description | validation | 
 | ---- | ---- | ---------- | ----------- | ---------- | 
-| token.onetime | string | required | ワンタイムトークン |            | 
 | value.body | string | required | 本文 | 10000文字まで | 
-| value.code | string | required | ソースコード | 10000文字まで | 
 | value.source_url | string | optional | GitHubなどのURL | 140文字まで。無くても可能。 | 
 ## example requests
 ```json
 {
     "value": {
-        "code": "編集後のコードをここに",
         "body": "編集後の本文",
-        "source_url": "編集後のソースURLをここに"
-    },
-    "token":  {
-        "onetime": "ここにトークンを"
     }
 }
 ```
@@ -67,20 +60,10 @@
   - 空文字のみで構成されているか、そもそもない
 - is too long (maximum is 10000 characters)
   - 長過ぎる
-#### code
-- can't be blank
-  - 空文字のみで構成されているか、そもそもない
-- is too long (maximum is 10000 characters)
-  - 長過ぎる
 ### エラー
 #### token
-- onetime token is empty
-  - ワインタイムトークンがパラメーターにない
-- onetime token is too old
-  - ワンタイムトークンの期限が切れている
-#### login
-- you are not logged in
-  - DB上にそのワンタイムトークンが存在しない
+- token is invalid
+  - トークンが古かったり不正だったりそもそもなかったり（ログインし直して）
 #### id
 - not found
   - status: 404

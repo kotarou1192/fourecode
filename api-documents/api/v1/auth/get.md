@@ -3,11 +3,9 @@
 ## request parameters
 | name | type | importance | description | 
 | ---- | ---- | ---------- | ----------- | 
-| token | string | required | onetime token | 
 ## example requests
 ```json
 {
-  "token": "your onetime token here"
 }
 ```
 ## example responses
@@ -46,10 +44,5 @@
 ## errors: key & messages
 ### バリデーションエラー以外
 #### token
-- property onetime of token is empty
-  - パラメーターが足りない
-- onetime token is too old
-  - ワンタイムトークンの有効期限が切れている場合
-#### login
-- you are not logged in
-  - DBに存在しないonetime token
+- token is invalid
+  - トークンが古かったり不正だったりそもそもなかったり（ログインし直して）
