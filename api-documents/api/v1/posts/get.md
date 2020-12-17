@@ -2,11 +2,9 @@
 ## request parameters
 | name | type | importance | description | validation | 
 | ---- | ---- | ---------- | ----------- | ---------- | 
-| token | string | required | onetime token |            | 
 ## example requests
 ```json
 {
-  "token": "onetime_token here"
 }
 ```
 ## example responses
@@ -17,7 +15,6 @@
     "body": {
         "title": "my first 投稿",
         "body": "my first 投稿の本文",
-        "code": "hello world!",
         "state": "open",
         "bestanswer_reward": 390,
         "source_url": "https://github.com/kotarou1192/fourecode",
@@ -52,7 +49,8 @@
 - not found
   - status: 404
   - 存在しないPostIDを指定したとき
+
 #### token
-- onetime token is too old
-  - tokenが古い
+- token is invalid
+  - トークンが古かったり不正だったりそもそもなかったり（ログインし直して）
   

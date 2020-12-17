@@ -32,9 +32,9 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should be created' do
-    m, o = create_sessions
+    session = create_sessions
     text = 'awesome review'
-    post "/api/v1/posts/#{@post.id}/reviews", params: { value: { body: text }, token: { onetime: o.token } }
+    post "/api/v1/posts/#{@post.id}/reviews", params: { value: { body: text } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     get_body
     assert @body['status'] == 'SUCCESS'
   end
@@ -42,9 +42,9 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
   test 'closed post should reject response' do
     @post.close
 
-    m, o = create_sessions
+    session = create_sessions
     text = 'awesome review'
-    post "/api/v1/posts/#{@post.id}/reviews", params: { value: { body: text }, token: { onetime: o.token } }
+    post "/api/v1/posts/#{@post.id}/reviews", params: { value: { body: text } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     get_body
     assert @body['status'] == 'FAILED'
     assert @body['errors'].first['key'] == 'closed'
@@ -58,8 +58,8 @@ class ReviewsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'deleted posts review should not be found' do
-    master, onetime = create_sessions
-    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    session = create_sessions
+    delete "/api/v1/users/#{@user.name}", headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     assert response.status == 200
     get "/api/v1/users/#{@user.name}"
     assert response.status == 404

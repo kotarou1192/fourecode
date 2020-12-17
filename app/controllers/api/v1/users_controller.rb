@@ -19,14 +19,7 @@ module Api
       end
 
       def show
-        if user_token_from_get_params
-          onetime_session = login?(user_token_from_get_params)
-          if onetime_session && token_available?(user_token_from_get_params)
-            @session_user = User.find_by(id: onetime_session.user_id)
-          elsif !token_available?(user_token_from_get_params)
-            return old_token_response
-          end
-        end
+        token_valid?
 
         selected_user = User.find_by(name: user_name)
 
@@ -40,29 +33,17 @@ module Api
       end
 
       def update
-        unless user_tokens[:onetime]
-          message = 'property onetime of token is empty'
-          key = ErrorKeys::TOKEN
-          return error_response(key: key, message: message)
-        end
-
-        onetime_session = login?(user_tokens[:onetime])
-        unless onetime_session
-          message = 'you are not logged in'
-          key = 'login'
-          return error_response(key: key, message: message)
-        end
-
-        return old_token_response unless token_available?(user_tokens[:onetime])
+        return unless authenticate
 
         selected_user = User.find_by(name: user_name)
+
         unless selected_user
           message = 'invalid user name'
           key = 'name'
           return error_response(key: key, message: message)
         end
 
-        session_user = onetime_session.user
+        session_user = @user
 
         unless session_user.admin? || session_user == selected_user
           message = 'you are not admin'
@@ -78,24 +59,9 @@ module Api
       end
 
       def destroy
-        if user_token_from_get_params.nil?
-          message = 'property onetime of token is empty'
-          key = ErrorKeys::TOKEN
-          return error_response(key: key, message: message)
-        end
+        return unless authenticate
 
-        onetime_session = login?(user_token_from_get_params)
-        unless onetime_session
-          message = 'you are not logged in'
-          key = 'login'
-          return error_response(key: key, message: message)
-        end
-
-        unless token_available?(user_token_from_get_params)
-          return old_token_response
-        end
-
-        session_user = onetime_session.user
+        session_user = @user
         selected_user = User.find_by(name: user_name)
         unless selected_user
           message = 'invalid user name'
@@ -125,7 +91,7 @@ module Api
           explanation: selected_user.explanation,
           icon: selected_user.icon,
           is_admin: selected_user.admin?,
-          is_mypage: @session_user == selected_user
+          is_mypage: @user == selected_user
         }
       end
 
@@ -167,13 +133,6 @@ module Api
         return nil if params[:token].nil?
 
         params.permit(:token)[:token]
-      end
-
-      def create_sessions
-        ActiveRecord::Base.transaction do
-          @master_session = @user.master_session.create!
-          @onetime_session = @user.onetime_session.create!
-        end
       end
 
       def generate_response(status, body)

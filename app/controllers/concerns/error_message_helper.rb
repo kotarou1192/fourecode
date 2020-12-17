@@ -41,6 +41,10 @@ module ErrorMessageHelper
                                                 .merge(error_messages(key: key, message: message))
   end
 
+  def authenticate_failed
+    error_response(key: ErrorKeys::TOKEN, message: 'token is invalid')
+  end
+
   def failed_to_create(model)
     messages = generate_error_messages_from_errors(model.errors.messages)
     error_response_base json: generate_response(ResponseStatus::FAILED, nil)

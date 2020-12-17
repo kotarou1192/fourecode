@@ -2,13 +2,16 @@
 
 # レビューに関する操作を集めたコントローラー
 class Api::V1::ReviewsController < ApplicationController
-  include UserHelper
   include ErrorKeys
+  include ErrorMessageHelper
+  include LoginHelper
+  include ResponseStatus
+  include ResponseHelper
 
   MAXIMUM_CONTENTS_COUNT = 1000
   DEFAULT_CONTENTS_COUNT = 50
 
-  before_action :get_user, only: %i[create]
+  before_action :authenticate, only: %i[create]
   # before_action :get_session_owner, only: %i[show]
 
   # postに対するレビューを投稿するメソッド

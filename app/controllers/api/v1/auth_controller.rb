@@ -6,6 +6,7 @@ module Api
       include ErrorMessageHelper
       include ResponseStatus
       include ErrorKeys
+      include LoginHelper
 
       # log-in
       def create
@@ -25,32 +26,17 @@ module Api
         end
 
         if user.authenticated?(:password, user_params[:password])
-          generate_access_token(user)
-          return render json: generate_response(SUCCESS, token: { master: @master_session.token, onetime: @onetime_session.token })
+          token = generate_token(user)
+          return render json: generate_response(SUCCESS, token: token)
         end
 
         render status: 400, json: generate_response(FAILED, nil)
       end
 
       def index
-        if user_token_from_get_params.nil?
-          message = 'property onetime of token is empty'
-          key = ErrorKeys::TOKEN
-          return error_response(key: key, message: message)
-        end
+        return unless authenticate
 
-        onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
-        unless onetime_session
-          message = 'you are not logged in'
-          key = 'login'
-          return error_response(key: key, message: message)
-        end
-
-        user = User.find_by(id: onetime_session.user_id)
-        unless onetime_session.available?
-          onetime_session.destroy!
-          return old_token_response
-        end
+        user = @user
 
         MasterSession.destroy_old_sessions(user)
         body = {
@@ -64,67 +50,19 @@ module Api
         render json: generate_response(SUCCESS, body)
       end
 
-      def update
-        if user_tokens[:master].nil?
-          message = 'property master of token is empty'
-          key = ErrorKeys::TOKEN
-          return error_response(key: key, message: message)
-        end
-
-        master_session = MasterSession.find_by(token_digest: MasterSession.digest(user_tokens[:master]))
-        unless master_session
-          message = 'you are not logged in'
-          key = 'login'
-          return error_response(key: key, message: message)
-        end
-
-        user = User.find_by(id: master_session.user_id)
-        unless master_session.available?
-          master_session.destroy!
-          return old_token_response(type: 'master')
-        end
-
-        MasterSession.destroy_old_sessions(user)
-        onetime_session = master_session.onetime_session.new
-        onetime_session.user = user
-        onetime_session.save!
-        render json: generate_response(SUCCESS, token: { onetime: onetime_session.token })
-      end
-
       # log-out
       def destroy
-        if user_token_from_get_params.nil?
-          message = 'you are not logged in'
-          key = 'login'
-          return error_response(key: key, message: message)
-        end
+        return unless authenticate
+        user = @user
 
-        onetime_session = OnetimeSession.find_by(token_digest: OnetimeSession.digest(user_token_from_get_params))
-        unless onetime_session
-          message = 'you are not logged in'
-          key = 'login'
-          return error_response(key: key, message: message)
-        end
-
-        unless onetime_session.available?
-          onetime_session.destroy!
-          return old_token_response
-        end
-
-        user = User.find_by(id: onetime_session.user_id)
         MasterSession.destroy_sessions(user)
         render json: generate_response(SUCCESS, message: 'logout successful')
       end
 
       private
 
-      def generate_access_token(user)
-        ActiveRecord::Base.transaction do
-          @master_session = user.master_session.create!
-          @onetime_session = @master_session.onetime_session.new
-          @onetime_session.user = user
-          @onetime_session.save!
-        end
+      def generate_token(user)
+        user.master_session.create!.token
       end
 
       def user_params
@@ -134,7 +72,7 @@ module Api
       def user_tokens
         return {} if params[:token].nil?
 
-        params.require(:token).permit(:master, :onetime)
+        params.permit(:token)[:token]
       end
 
       def user_token_from_get_params

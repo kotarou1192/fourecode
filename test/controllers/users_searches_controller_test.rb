@@ -41,8 +41,8 @@ class UsersSearchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'deleted user should not be found' do
-    master, onetime = create_sessions
-    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    session = create_sessions
+    delete "/api/v1/users/#{@user.name}", headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     assert response.status == 200
     get '/api/v1/search/users', params: { keyword: '_' } # '_' is wildcard
     body = JSON.parse(response.body)

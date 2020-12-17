@@ -69,16 +69,16 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   # get user test
 
   test 'old token should be rejected' do
-    master, onetime = create_sessions
-    onetime.update(created_at: 100.days.ago)
-    get '/api/v1/users/hoge', params: { token: onetime.token }
+    session = create_sessions
+    session.update(created_at: 100.days.ago)
+    get '/api/v1/users/hoge', headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
-    assert response.status == 400 && body['errors'][0]['key'] == 'token'
+    assert response.status == 200
   end
 
   test 'users should be found' do
-    master, onetime = create_sessions
-    get '/api/v1/users/hoge', params: { token: onetime.token }
+    session = create_sessions
+    get '/api/v1/users/hoge', headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
     assert response.status == 200
   end
@@ -86,45 +86,45 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   # update user test
 
   test 'empty token should be rejected in update' do
-    master, onetime = create_sessions
-    put '/api/v1/users/hoge', params: { token: { onetime: nil }, value: { name: 'hogetaro' } }
+    session = create_sessions
+    put '/api/v1/users/hoge', params: { value: { name: 'hogetaro' } }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'token'
   end
 
   test 'old token should be rejected in update' do
-    master, onetime = create_sessions
-    onetime.update(created_at: 100.days.ago)
-    put '/api/v1/users/hoge', params: { token: { onetime: onetime.token }, value: { name: 'hogetaro' } }
+    session = create_sessions
+    session.update(created_at: 100.days.ago)
+    put '/api/v1/users/hoge', params: { value: { name: 'hogetaro' } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'token'
   end
 
   test 'invalid token should be rejected in update' do
-    master, onetime = create_sessions
-    put '/api/v1/users/hoge', params: { token: { onetime: 'hoge' }, value: { name: 'hogetaro' } }
+    session = create_sessions
+    put '/api/v1/users/hoge', params: { value: { name: 'hogetaro' } }, headers: { HTTP_AUTHORIZATION: "Bearer hoge" }
     body = JSON.parse(response.body)
-    assert response.status == 400 && body['errors'][0]['key'] == 'login'
+    assert response.status == 400 && body['errors'][0]['key'] == 'token'
   end
 
   test 'invalid name should be rejected in update' do
-    master, onetime = create_sessions
-    put '/api/v1/users/papa', params: { token: { onetime: onetime.token }, value: { name: 'hogetaro' } }
+    session = create_sessions
+    put '/api/v1/users/papa', params: { value: { name: 'hogetaro' } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'name'
   end
 
   test 'you are not admin' do
-    master, onetime = create_sessions
-    put '/api/v1/users/punipuni', params: { token: { onetime: onetime.token }, value: { name: 'hogetaro' } }
+    session = create_sessions
+    put '/api/v1/users/punipuni', params: { value: { name: 'hogetaro' } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'admin'
   end
 
   test 'invalid user parameters should be rejected in update' do
-    master, onetime = create_sessions
-    put '/api/v1/users/hoge', params: { token: { onetime: onetime.token },
-                                        value: { name: '  ', nickname: 'hogefuga', email: 'invalid', password: 'fu' } }
+    session = create_sessions
+    put '/api/v1/users/hoge', params: {
+      value: { name: '  ', nickname: 'hogefuga', email: 'invalid', password: 'fu' } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
 
     is_name_failed = body['errors'].any? do |error|
@@ -143,50 +143,50 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   # delete user test
 
   test 'empty token should be rejected in delete' do
-    master, onetime = create_sessions
-    delete '/api/v1/users/hoge', params: { token: nil }
+    session = create_sessions
+    delete '/api/v1/users/hoge'
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'token'
   end
 
   test 'invalid token should be rejected in delete' do
-    master, onetime = create_sessions
-    delete '/api/v1/users/hoge', params: { token: 'gohho' }
+    session = create_sessions
+    delete '/api/v1/users/hoge', headers: { HTTP_AUTHORIZATION: "Bearer #{session.token + 'aa'}" }
     body = JSON.parse(response.body)
-    assert response.status == 400 && body['errors'][0]['key'] == 'login'
+    assert response.status == 400 && body['errors'][0]['key'] == 'token'
   end
 
   test 'old token should be rejected in delete' do
-    master, onetime = create_sessions
-    onetime.update(created_at: 100.days.ago)
-    delete '/api/v1/users/hoge', params: { token: onetime.token }
+    session = create_sessions
+    session.update(created_at: 100.days.ago)
+    delete '/api/v1/users/hoge', headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'token'
   end
 
   test 'invalid user name should be rejected in delete' do
-    master, onetime = create_sessions
-    delete '/api/v1/users/piyopiyo', params: { token: onetime.token }
+    session = create_sessions
+    delete '/api/v1/users/piyopiyo', headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'name'
   end
 
   test 'you are not admin in delete' do
-    master, onetime = create_sessions
-    delete '/api/v1/users/punipuni', params: { token: onetime.token }
+    session = create_sessions
+    delete '/api/v1/users/punipuni', headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     body = JSON.parse(response.body)
     assert response.status == 400 && body['errors'][0]['key'] == 'admin'
   end
 
   test 'user should be deleted' do
-    master, onetime = create_sessions
-    delete '/api/v1/users/hoge', params: { token: onetime.token }
+    session = create_sessions
+    delete '/api/v1/users/hoge', headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     assert response.status == 200
   end
 
   test 'deleted user should not be found' do
-    master, onetime = create_sessions
-    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    session = create_sessions
+    delete "/api/v1/users/#{@user.name}", headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     assert response.status == 200
     get "/api/v1/users/#{@user.name}"
     assert response.status == 404

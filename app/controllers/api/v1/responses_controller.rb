@@ -2,9 +2,13 @@
 
 # レビューに対するレスポンスを取り扱うためのコントローラー
 class Api::V1::ResponsesController < ApplicationController
-  include UserHelper
+  include ErrorKeys
+  include ErrorMessageHelper
+  include LoginHelper
+  include ResponseStatus
+  include ResponseHelper
 
-  before_action :get_user, only: %i[create]
+  before_action :authenticate, only: %i[create]
 
   # reviewに対するresponseを作成するメソッド
   def create

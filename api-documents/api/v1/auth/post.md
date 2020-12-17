@@ -20,10 +20,7 @@
 {
     "status": "SUCCESS",
     "body": {
-        "token": {
-            "master": "new master token",
-            "onetime": "new onetime token"
-        }
+        "token": "your token"
     }
 }
 ```

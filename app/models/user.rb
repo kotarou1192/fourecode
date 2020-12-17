@@ -147,6 +147,14 @@ class User < ApplicationRecord
     end
   end
 
+  def self.new_deleted
+    deleted = self.new
+    deleted.id = 0
+    deleted.name = 'DELETED_USER'
+    deleted.nickname = 'DELETED_USER'
+    deleted
+  end
+
   private
 
   # activeなUser（削除されていない）だけに絞り込みの場合は
