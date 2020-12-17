@@ -7,7 +7,7 @@ class Api::V1::PostsController < ApplicationController
   include ErrorKeys
   include ErrorMessageHelper
 
-  before_action :authenticate, only: %i[create update show destroy]
+  before_action :authenticate, only: %i[create update destroy]
 
   # destroy the post
   def destroy
@@ -63,6 +63,8 @@ class Api::V1::PostsController < ApplicationController
 
   # show the post
   def show
+    token_valid?
+
     post = Post.find(post_id)
     unless post
       message = 'not found'

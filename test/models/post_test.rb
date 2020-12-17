@@ -52,11 +52,6 @@ class PostTest < ActiveSupport::TestCase
     assert_not @post.valid?
   end
 
-  test 'code should be present' do
-    @post.code = ' ' * 6
-    assert_not @post.valid?
-  end
-
   test 'invalid status should be rejected' do
     begin
       @post.change_state 'hoge'

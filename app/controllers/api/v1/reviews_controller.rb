@@ -3,6 +3,7 @@
 # レビューに関する操作を集めたコントローラー
 class Api::V1::ReviewsController < ApplicationController
   include ErrorKeys
+  include ErrorMessageHelper
   include LoginHelper
   include ResponseStatus
   include ResponseHelper

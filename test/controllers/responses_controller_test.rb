@@ -16,7 +16,7 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
     @post = @user.posts.create(title: 'test', body: 'test', code: 'test', source_url: 'test')
     @review = Review.generate_record(body: 'review', user: @user, post: @post)
     @review.save
-    @master, @onetime = create_sessions
+    @session = create_sessions
   end
 
   def get_body
@@ -24,9 +24,9 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should be created' do
-    m, o = create_sessions
+    session = create_sessions
     text = 'awesome review'
-    post "/api/v1/posts/#{@post.id}/reviews/#{@review.id}", params: { value: { body: text }, token: { onetime: o.token } }
+    post "/api/v1/posts/#{@post.id}/reviews/#{@review.id}", params: { value: { body: text } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     get_body
     assert @body['status'] == 'SUCCESS'
   end
@@ -34,9 +34,9 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
   test 'closed post should reject to post response' do
     @post.close
 
-    m, o = create_sessions
+    session = create_sessions
     text = 'awesome review'
-    post "/api/v1/posts/#{@post.id}/reviews/#{@review.id}", params: { value: { body: text }, token: { onetime: o.token } }
+    post "/api/v1/posts/#{@post.id}/reviews/#{@review.id}", params: { value: { body: text } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     get_body
     assert @body['status'] == 'FAILED'
     assert @body['errors'].first['key'] == 'closed'
@@ -45,9 +45,9 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
   test 'can not response to response' do
     response = @review.reply(user: @user, body: 'body')
 
-    m, o = create_sessions
+    session = create_sessions
     text = 'awesome review'
-    post "/api/v1/posts/#{@post.id}/reviews/#{response.id}", params: { value: { body: text }, token: { onetime: o.token } }
+    post "/api/v1/posts/#{@post.id}/reviews/#{response.id}", params: { value: { body: text } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     get_body
     assert @body['status'] == 'FAILED'
     assert @body['errors'].first['key'] == 'response'
@@ -55,11 +55,11 @@ class ResponsesControllerTest < ActionDispatch::IntegrationTest
 
   # reviewにレスポンスをしたときユーザーが消せなかったため、そのテスト
   test 'user should be deleted' do
-    master, onetime = create_sessions
+    session = create_sessions
     text = 'awesome review'
-    post "/api/v1/posts/#{@post.id}/reviews/#{@review.id}", params: { value: { body: text }, token: { onetime: onetime.token } }
+    post "/api/v1/posts/#{@post.id}/reviews/#{@review.id}", params: { value: { body: text } }, headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     assert response.status == 200
-    delete "/api/v1/users/#{@user.name}", params: { token: onetime.token }
+    delete "/api/v1/users/#{@user.name}", headers: { HTTP_AUTHORIZATION: "Bearer #{session.token}" }
     assert response.status == 200
     get "/api/v1/users/#{@user.name}"
     assert response.status == 404
